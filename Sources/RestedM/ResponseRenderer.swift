@@ -81,7 +81,7 @@ enum ResponseRenderer {
                     display = formatted
                 }
             }
-        } else if pretty, contentType.contains("xml"), let document = try? XMLDocument(xmlString: text, options: []) {
+        } else if pretty, contentType.contains("xml"), let document = try? XMLDocument(xmlString: text, options: [.nodeLoadExternalEntitiesNever]) {
             display = document.xmlString(options: [.nodePrettyPrint])
         }
         let output = NSMutableAttributedString(string: display, attributes: [.font: font, .foregroundColor: NSColor.labelColor])

@@ -64,6 +64,17 @@ struct EchoServerTests {
         #expect(stopped.response?.statusCode == 302)
     }
 
+    @Test func crossOriginRedirectDropsAuthorization() async throws {
+        var request = echoRequest("GET", "/redirect-away")
+        request.headers = [KeyValueRow(name: "Authorization", value: "Bearer secret"), KeyValueRow(name: "X-Test", value: "yes")]
+        let (exchange, json) = try await send(request)
+        #expect(exchange.response?.statusCode == 200)
+        #expect(json["query"] as? String == "away=1")
+        let headers = json["headers"] as? [String: String]
+        #expect(headers?["Authorization"] == nil)
+        #expect(headers?["X-Test"] == "yes")
+    }
+
     @Test func basicAuthChallengeAndPreemptive() async throws {
         var request = echoRequest("GET", "/auth")
         let (anonymous, _) = try await send(request)

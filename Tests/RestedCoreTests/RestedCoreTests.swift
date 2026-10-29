@@ -130,3 +130,33 @@ private func body(_ built: BuiltRequest) -> String {
         == "POST https://api.test/items\nAccept: */*\n\na=1\n\nHTTP 404 Not Found\nContent-Type: text/plain\n\nmissing\n")
     #expect(exchange.transcript(includeRequest: false, includeResponseHeaders: false, includeResponseBody: true) == "missing\n")
 }
+
+@Test func redirectsKeepCredentialsOnlyWithinOrigin() {
+    let origin = URL(string: "https://api.test/login")!
+    var request = URLRequest(url: URL(string: "https://api.test:443/next")!)
+    request.setValue("Basic abc", forHTTPHeaderField: "Authorization")
+    request.setValue("a=1", forHTTPHeaderField: "Cookie")
+    request.setValue("yes", forHTTPHeaderField: "X-Other")
+
+    let sameOrigin = HTTPClient.redirectRequest(request, from: origin)
+    #expect(sameOrigin.value(forHTTPHeaderField: "Authorization") == "Basic abc")
+
+    for target in ["https://evil.test/next", "http://api.test/next", "https://api.test:8443/next"] {
+        request.url = URL(string: target)!
+        let stripped = HTTPClient.redirectRequest(request, from: origin)
+        #expect(stripped.value(forHTTPHeaderField: "Authorization") == nil, "\(target)")
+        #expect(stripped.value(forHTTPHeaderField: "Cookie") == nil, "\(target)")
+        #expect(stripped.value(forHTTPHeaderField: "X-Other") == "yes", "\(target)")
+    }
+}
+
+@Test func credentialsAnswerOnlyTheOriginalServer() {
+    let origin = URL(string: "http://api.test/items")!
+    func space(_ host: String, _ port: Int, _ scheme: String) -> URLProtectionSpace {
+        URLProtectionSpace(host: host, port: port, protocol: scheme, realm: "r", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
+    }
+    #expect(HTTPClient.protectionSpace(space("API.test", 80, "http"), belongsTo: origin))
+    #expect(!HTTPClient.protectionSpace(space("evil.test", 80, "http"), belongsTo: origin))
+    #expect(!HTTPClient.protectionSpace(space("api.test", 8080, "http"), belongsTo: origin))
+    #expect(!HTTPClient.protectionSpace(space("api.test", 443, "https"), belongsTo: origin))
+}

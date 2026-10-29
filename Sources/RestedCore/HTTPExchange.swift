@@ -107,18 +107,53 @@ public struct HTTPExchange {
 
 /// Sends one request with Rested's redirect, certificate and authentication rules.
 public final class HTTPClient: NSObject, URLSessionTaskDelegate {
+    /// Headers that carry credentials and must not follow a redirect to another origin.
+    static let credentialHeaders = ["Authorization", "Proxy-Authorization", "Cookie"]
+
+    private let origin: URL
     private let followRedirects: Bool
     private let allowInvalidCertificates: Bool
     private let credential: URLCredential?
 
-    public init(followRedirects: Bool, allowInvalidCertificates: Bool, credential: URLCredential?) {
+    public init(origin: URL, followRedirects: Bool, allowInvalidCertificates: Bool, credential: URLCredential?) {
+        self.origin = origin
         self.followRedirects = followRedirects
         self.allowInvalidCertificates = allowInvalidCertificates
         self.credential = credential
     }
 
+    static func defaultPort(_ scheme: String?) -> Int {
+        scheme?.lowercased() == "https" ? 443 : 80
+    }
+
+    /// Same scheme, host and port, so an HTTPS to HTTP downgrade counts as a different origin.
+    static func isSameOrigin(_ lhs: URL, _ rhs: URL) -> Bool {
+        lhs.scheme?.lowercased() == rhs.scheme?.lowercased()
+            && lhs.host?.lowercased() == rhs.host?.lowercased()
+            && (lhs.port ?? defaultPort(lhs.scheme)) == (rhs.port ?? defaultPort(rhs.scheme))
+    }
+
+    static func protectionSpace(_ space: URLProtectionSpace, belongsTo origin: URL) -> Bool {
+        !space.isProxy()
+            && space.host.lowercased() == origin.host?.lowercased()
+            && space.port == (origin.port ?? defaultPort(origin.scheme))
+            && space.protocol?.lowercased() == origin.scheme?.lowercased()
+    }
+
+    static func redirectRequest(_ request: URLRequest, from origin: URL) -> URLRequest {
+        guard let target = request.url, !isSameOrigin(origin, target) else {
+            return request
+        }
+        var stripped = request
+        for name in credentialHeaders {
+            stripped.setValue(nil, forHTTPHeaderField: name)
+        }
+        return stripped
+    }
+
     public static func send(_ built: BuiltRequest, request: RestRequest, options: SendOptions, allowInvalidCertificates: Bool) async -> HTTPExchange {
         let client = HTTPClient(
+            origin: built.urlRequest.url!,
             followRedirects: request.followRedirects,
             allowInvalidCertificates: allowInvalidCertificates,
             credential: built.credential
@@ -164,7 +199,7 @@ public final class HTTPClient: NSObject, URLSessionTaskDelegate {
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
-        followRedirects ? request : nil
+        followRedirects ? Self.redirectRequest(request, from: origin) : nil
     }
 
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
@@ -183,7 +218,8 @@ public final class HTTPClient: NSObject, URLSessionTaskDelegate {
             }
             return (.performDefaultHandling, nil)
         case NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodHTTPDigest, NSURLAuthenticationMethodNTLM:
-            if let credential, challenge.previousFailureCount == 0 {
+            if let credential, challenge.previousFailureCount == 0,
+               Self.protectionSpace(challenge.protectionSpace, belongsTo: origin) {
                 return (.useCredential, credential)
             }
             return (.rejectProtectionSpace, nil)
