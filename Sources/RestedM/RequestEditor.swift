@@ -45,8 +45,8 @@ struct RequestEditor: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
+            .padding(.horizontal, Space.pane)
+            .padding(.top, Space.sm)
 
             switch layout.wrappedValue {
             case .both:
@@ -85,8 +85,8 @@ struct RequestEditor: View {
             Text("Use {{name}} in the URL to insert a parameter's value into the path.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .padding(.horizontal, 12)
-                .padding(.bottom, 6)
+                .padding(.horizontal, Space.pane)
+                .padding(.bottom, Space.sm)
         }
     }
 
@@ -102,20 +102,20 @@ struct RequestEditor: View {
                 .disabled(!request.usesCustomBody)
                 .opacity(request.usesCustomBody ? 1 : 0.5)
                 .autocorrectionDisabled()
-                .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
-                .padding(.horizontal, 12)
+                .overlay(RoundedRectangle(cornerRadius: Radius.xs).stroke(Color(nsColor: .separatorColor)))
+                .padding(.horizontal, Space.pane)
             if request.usesCustomBody && request.customBodyIsIgnored {
                 Label("\(request.method) requests cannot carry a body. Parameters are sent in the URL instead.", systemImage: "exclamationmark.triangle")
                     .font(.caption)
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 12)
+                    .foregroundStyle(Palette.warning)
+                    .padding(.horizontal, Space.pane)
             }
             Spacer(minLength: 8)
         }
     }
 
     private var optionsBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Space.md) {
             Button {
                 showsAuthorization = true
             } label: {
@@ -138,8 +138,8 @@ struct RequestEditor: View {
             Toggle("Follow Redirects", isOn: $request.followRedirects)
         }
         .controlSize(.small)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, Space.pane)
+        .padding(.vertical, Space.sm)
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -151,15 +151,15 @@ struct RequestEditor: View {
         @ViewBuilder accessory: () -> Accessory,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Space.sm) {
             HStack {
                 Text(title)
                     .font(.headline)
                 Spacer()
                 accessory()
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
+            .padding(.horizontal, Space.pane)
+            .padding(.top, Space.sm)
             content()
         }
     }
@@ -170,7 +170,7 @@ struct AuthorizationSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Space.lg) {
             Text("Basic Authorization")
                 .font(.title3.bold())
             Form {
@@ -194,7 +194,7 @@ struct AuthorizationSheet: View {
                 .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(20)
-        .frame(width: 440)
+        .padding(Space.xl)
+        .frame(width: Layout.sheetWidth)
     }
 }

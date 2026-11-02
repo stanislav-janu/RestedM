@@ -14,12 +14,12 @@ enum TranscriptExporter {
         @ObservedObject var options: Options
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Space.xs) {
                 Toggle("Include Request Headers & Body", isOn: $options.includeRequest)
                 Toggle("Include Response Headers", isOn: $options.includeResponseHeaders)
                 Toggle("Include Response Body", isOn: $options.includeResponseBody)
             }
-            .padding(12)
+            .padding(Space.md)
         }
     }
 

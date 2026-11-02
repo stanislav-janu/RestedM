@@ -20,13 +20,13 @@ struct RequestWindow: View {
             Divider()
             HSplitView {
                 RequestEditor(request: $request, showsAuthorization: $showsAuthorization)
-                    .frame(minWidth: 400, idealWidth: 480, maxHeight: .infinity)
+                    .frame(minWidth: Layout.editorMinWidth, idealWidth: Layout.editorIdealWidth, maxHeight: .infinity)
                 ResponsePane(exchange: exchange, isSending: isSending)
-                    .frame(minWidth: 420, idealWidth: 560, maxHeight: .infinity)
+                    .frame(minWidth: Layout.responseMinWidth, idealWidth: Layout.responseIdealWidth, maxHeight: .infinity)
             }
             .frame(maxHeight: .infinity)
         }
-        .frame(minWidth: 880, minHeight: 520)
+        .frame(minWidth: Layout.windowMinWidth, minHeight: Layout.windowMinHeight)
         .sheet(isPresented: $showsAuthorization) {
             AuthorizationSheet(request: $request)
         }
@@ -45,14 +45,14 @@ struct RequestWindow: View {
     }
 
     private var urlBar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Space.sm) {
             Picker("Method", selection: $request.method) {
                 ForEach(methodChoices, id: \.self) { method in
                     Text(method).tag(method)
                 }
             }
             .labelsHidden()
-            .frame(width: 104)
+            .frame(width: Layout.methodPickerWidth)
 
             TextField("http://localhost:3000/", text: $request.urlString)
                 .textFieldStyle(.roundedBorder)
@@ -70,8 +70,8 @@ struct RequestWindow: View {
             .buttonStyle(.borderedProminent)
             .help("Send Request (⌘R)")
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Space.pane)
+        .padding(.vertical, Space.sm)
     }
 
     private var methodChoices: [String] {

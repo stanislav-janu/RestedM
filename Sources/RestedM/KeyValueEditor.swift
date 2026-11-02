@@ -13,7 +13,7 @@ struct KeyValueEditor: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                LazyVStack(spacing: 4) {
+                LazyVStack(spacing: Space.xs) {
                     ForEach($rows) { $row in
                         rowView($row)
                     }
@@ -22,11 +22,11 @@ struct KeyValueEditor: View {
                             .font(.callout)
                             .foregroundStyle(.tertiary)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, Space.md)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
+                .padding(.horizontal, Space.pane)
+                .padding(.vertical, Space.xs)
             }
             HStack {
                 Button {
@@ -38,13 +38,13 @@ struct KeyValueEditor: View {
             }
             .buttonStyle(.borderless)
             .controlSize(.small)
-            .padding(.horizontal, 12)
-            .padding(.bottom, 6)
+            .padding(.horizontal, Space.pane)
+            .padding(.bottom, Space.sm)
         }
     }
 
     private func rowView(_ row: Binding<KeyValueRow>) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Space.sm) {
             Toggle("", isOn: row.enabled)
                 .labelsHidden()
                 .toggleStyle(.checkbox)
@@ -56,7 +56,7 @@ struct KeyValueEditor: View {
                         .textFieldStyle(.roundedBorder)
                 }
             }
-            .frame(minWidth: 120, maxWidth: 220)
+            .frame(minWidth: Layout.rowNameMinWidth, maxWidth: Layout.rowNameMaxWidth)
             Group {
                 if let valueSuggestions {
                     ComboField(text: row.value, placeholder: valuePlaceholder, items: valueSuggestions(row.wrappedValue.name))

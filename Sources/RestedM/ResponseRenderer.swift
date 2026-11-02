@@ -65,7 +65,7 @@ enum ResponseRenderer {
             output.append(NSAttributedString(string: firstLine + "\n", attributes: [.font: boldFont, .foregroundColor: NSColor.labelColor]))
         }
         for header in headers {
-            output.append(NSAttributedString(string: header.name, attributes: [.font: boldFont, .foregroundColor: NSColor.systemBlue]))
+            output.append(NSAttributedString(string: header.name, attributes: [.font: boldFont, .foregroundColor: CodeColors.headerName]))
             output.append(plain(": \(header.value)\n"))
         }
         return output
@@ -105,10 +105,10 @@ enum JSONHighlighter {
     static func apply(to text: NSMutableAttributedString) {
         let range = NSRange(location: 0, length: text.length)
         let source = text.string
-        color(number, .systemOrange, in: text, source: source, range: range)
-        color(literal, .systemPink, in: text, source: source, range: range)
-        color(string, .systemGreen, in: text, source: source, range: range)
-        color(key, .systemPurple, in: text, source: source, range: range)
+        color(number, CodeColors.number, in: text, source: source, range: range)
+        color(literal, CodeColors.literal, in: text, source: source, range: range)
+        color(string, CodeColors.string, in: text, source: source, range: range)
+        color(key, CodeColors.key, in: text, source: source, range: range)
     }
 
     private static func color(_ expression: NSRegularExpression, _ color: NSColor, in text: NSMutableAttributedString, source: String, range: NSRange) {

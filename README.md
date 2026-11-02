@@ -37,4 +37,5 @@ RESTEDM_ECHO_URL=http://127.0.0.1:8765 RESTEDM_SAMPLES=/path/to/requests swift t
 
 - `Sources/RestedCore`: document format, request building, HTTP client, JSON formatting. No UI.
 - `Sources/RestedM`: SwiftUI app (document windows, editors, response view, settings).
-- `scripts/`: bundle build script and icon renderer.
+- `Icon/AppIcon.icon`: Icon Composer app icon. `scripts/make-icon.sh` compiles it, `scripts/icon-review.sh` renders a contact sheet of every look.
+- `scripts/`: bundle build script and icon tools.
