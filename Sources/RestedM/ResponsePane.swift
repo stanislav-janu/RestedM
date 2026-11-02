@@ -4,12 +4,12 @@ import SwiftUI
 struct ResponsePane: View {
     let exchange: HTTPExchange?
     let isSending: Bool
+    @Binding var tab: ResponseTab?
 
     @AppStorage(Preferences.defaultResponseTab) private var defaultTab = ResponseTab.body.rawValue
     @AppStorage(Preferences.prettyPrint) private var prettyPrint = true
     @AppStorage(Preferences.highlightSyntax) private var highlightSyntax = true
     @AppStorage(Preferences.lineNumbers) private var lineNumbers = false
-    @State private var tab: ResponseTab?
 
     private var selectedTab: Binding<ResponseTab> {
         Binding(

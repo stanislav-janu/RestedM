@@ -34,6 +34,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// SwiftUI creates an untitled document even when launched to open files.
     /// Close it once the opened files are in, so only those windows remain.
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Agent runs keep the untitled document: snapshots show it as the empty request.
+        if Snapshot.isActive || SelfTest.isActive {
+            Snapshot.run()
+            SelfTest.run()
+            return
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             let documents = NSDocumentController.shared.documents
             guard documents.contains(where: { $0.fileURL != nil }) else {

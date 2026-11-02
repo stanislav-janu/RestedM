@@ -13,6 +13,28 @@ public struct HTTPExchange {
     public var elapsed: TimeInterval
     public var errorMessage: String?
 
+    public init(
+        method: String,
+        url: URL,
+        requestHeaders: [(name: String, value: String)],
+        requestBody: Data?,
+        requestEncoding: String.Encoding,
+        response: HTTPURLResponse?,
+        body: Data,
+        elapsed: TimeInterval,
+        errorMessage: String?
+    ) {
+        self.method = method
+        self.url = url
+        self.requestHeaders = requestHeaders
+        self.requestBody = requestBody
+        self.requestEncoding = requestEncoding
+        self.response = response
+        self.body = body
+        self.elapsed = elapsed
+        self.errorMessage = errorMessage
+    }
+
     public var statusLine: String? {
         guard let response else {
             return nil

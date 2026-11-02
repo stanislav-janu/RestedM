@@ -56,7 +56,7 @@ struct KeyValueEditor: View {
                         .textFieldStyle(.roundedBorder)
                 }
             }
-            .frame(minWidth: Layout.rowNameMinWidth, maxWidth: Layout.rowNameMaxWidth)
+            .frame(minWidth: Metrics.rowNameMinWidth, maxWidth: Metrics.rowNameMaxWidth)
             Group {
                 if let valueSuggestions {
                     ComboField(text: row.value, placeholder: valuePlaceholder, items: valueSuggestions(row.wrappedValue.name))

@@ -1,8 +1,8 @@
 # RestedM stories
 
-Built from `docs/BRIEF.md`. RESTed 2.7 is not installed, so `Screens:` names the snapshot pages that will show each story (`docs/snapshots/<page>.png`), not reference screenshots.
+Built from `docs/BRIEF.md`. RESTed 2.7 is not installed, so `Screens:` names the snapshot pages that will show each story (`build/snapshots/<page>-light.png` and `-dark.png`, written by `scripts/snap.sh`), not reference screenshots.
 
-Snapshot pages: `request-empty`, `request-filled`, `response-body`, `response-headers`, `response-sent`, `response-error`, `authorization-sheet`, `settings`, `environments`, `history`, `curl-import`.
+Snapshot pages: `request-empty`, `request-filled`, `response-body`, `response-headers`, `response-sent`, `response-404`, `response-error`, `authorization-sheet`, `settings`, `environments`, `history`, `curl-import`.
 
 ## M1 Core loop (built before the backlog existed)
 
@@ -77,9 +77,38 @@ Status: done
 ### S-009 Snapshot and self-test mode
 As the developer, I run the app with a flag that renders every snapshot page with seed data and exits.
 Acceptance:
-- [self] `RESTEDM_SNAPSHOT=1` writes every page listed at the top of this file to `docs/snapshots/`.
+- [self] `RESTEDM_SNAPSHOT=1` writes every page listed at the top of this file to `build/snapshots/` (`scripts/snap.sh`).
 - [self] Seed data shows filled headers, parameters, a JSON response and a 404.
-- [self] Every page renders in light and dark appearance (`docs/snapshots/<page>-dark.png`).
+- [self] Every page renders in light and dark appearance (`<page>-dark.png`).
+Status: done
+
+### S-017 Toolbar instead of a custom URL bar
+As the user, I find the method, URL and Send controls in the window toolbar, like other Mac document apps.
+Screens: request-empty, request-filled
+Acceptance:
+- [snap] The window shows the document title and the controls in a unified toolbar.
+- [snap] Command-L still focuses the URL field.
+- [snap] A saved document opens with no focus ring; only a new, empty document focuses the URL field.
+Status: todo
+
+### S-018 Request options in the toolbar and Request menu
+As the user, I reach Authorization, string encoding and Follow Redirects from the Request menu and a toolbar options menu, not from a bar on the bottom edge.
+Screens: request-filled, authorization-sheet
+Depends: S-017
+Acceptance:
+- [snap] The bottom options bar is gone; the window has no controls on its bottom edge.
+- [snap] The toolbar shows a lock symbol that is closed with a username set; its tooltip names the user.
+- [self] Request ▸ Authorization… (Option-Command-A) opens the sheet; Request ▸ Follow Redirects is a checkmark item.
+Status: todo
+
+### S-019 Editor sections size to their content
+As the user, I see headers, parameters and body take the space their content needs, without large empty bands.
+Screens: request-filled, request-empty
+Depends: S-018
+Acceptance:
+- [snap] Two header rows take two rows of height plus the Add button; parameters and body get the rest.
+- [snap] With "Use Custom HTTP Body" off the body area shrinks to the toggle and one line saying parameters are sent.
+- [manual] The dividers still drag, and the chosen heights survive a relaunch.
 Status: todo
 
 ### S-010 See send errors in the response pane
@@ -91,8 +120,9 @@ Acceptance:
 Status: todo
 
 ### S-011 See the final URL before sending
-As the user, I see under the URL field what will be sent after `{{name}}` substitution and query parameters.
+As the user, I see at the top of the request editor what will be sent after `{{name}}` substitution and query parameters.
 Screens: request-filled
+Depends: S-017
 Acceptance:
 - [snap] A secondary, monospaced line shows the resolved URL when it differs from the typed one.
 - [snap] An unresolved `{{name}}` is marked in orange with "No value for name".
@@ -140,34 +170,6 @@ Screens: request-filled, response-body
 Acceptance:
 - [snap] GET, POST, PUT, PATCH and DELETE each have their own tint; others use the accent color.
 - [snap] Text on the tint uses the on-accent token and passes 4.5:1 in light and dark mode.
-Status: todo
-
-### S-017 Toolbar instead of a custom URL bar
-As the user, I find the method, URL and Send controls in the window toolbar, like other Mac document apps.
-Screens: request-empty, request-filled
-Acceptance:
-- [snap] The window shows the document title and the controls in a unified toolbar.
-- [snap] Command-L still focuses the URL field.
-- [snap] A saved document opens with no focus ring; only a new, empty document focuses the URL field.
-Status: todo
-
-### S-018 Request options in the toolbar and Request menu
-As the user, I reach Authorization, string encoding and Follow Redirects from the Request menu and a toolbar options menu, not from a bar on the bottom edge.
-Screens: request-filled, authorization-sheet
-Depends: S-017
-Acceptance:
-- [snap] The bottom options bar is gone; the window has no controls on its bottom edge.
-- [snap] The toolbar shows a lock symbol that is closed with a username set; its tooltip names the user.
-- [self] Request ▸ Authorization… (Option-Command-A) opens the sheet; Request ▸ Follow Redirects is a checkmark item.
-Status: todo
-
-### S-019 Editor sections size to their content
-As the user, I see headers, parameters and body take the space their content needs, without large empty bands.
-Screens: request-filled, request-empty
-Acceptance:
-- [snap] Two header rows take two rows of height plus the Add button; parameters and body get the rest.
-- [snap] With "Use Custom HTTP Body" off the body area shrinks to the toggle and one line saying parameters are sent.
-- [manual] The dividers still drag, and the chosen heights survive a relaunch.
 Status: todo
 
 ## M3 Environments

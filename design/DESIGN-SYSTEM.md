@@ -29,9 +29,9 @@ Rules:
 
 `Radius.xs 6`: chips, badges, and framed text areas that sit next to text fields, so they match the system text field corners. Inner corners are concentric: inner radius = outer radius - inset.
 
-## Layout.swift
+## Metrics.swift
 
-Window minimum (880 × 520), editor and response column widths, method picker width, row name column limits and the sheet width (440). A new fixed size goes here with a name, not inline in a view.
+`Metrics`: window minimum (880 × 520), editor and response column widths, method picker width, row name column limits and the sheet width (440). A new fixed size goes here with a name, not inline in a view.
 
 ## Controls and motion
 

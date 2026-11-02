@@ -195,6 +195,6 @@ struct AuthorizationSheet: View {
             }
         }
         .padding(Space.xl)
-        .frame(width: Layout.sheetWidth)
+        .frame(width: Metrics.sheetWidth)
     }
 }

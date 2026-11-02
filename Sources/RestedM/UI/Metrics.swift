@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Fixed sizes: window minimums, column widths, sheet widths.
-enum Layout {
+enum Metrics {
     static let windowMinWidth: CGFloat = 880
     static let windowMinHeight: CGFloat = 520
     static let editorMinWidth: CGFloat = 400
