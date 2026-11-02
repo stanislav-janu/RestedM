@@ -20,6 +20,7 @@ enum SelfTest {
             checkMenus()
             checkSymbols()
             await checkSeedDocument()
+            await checkNewRequestFocus()
             print("SELFTEST \(failures == 0 ? "PASS" : "FAIL") (\(failures) failed)")
             let code: Int32 = failures == 0 ? 0 : 1
             for document in NSDocumentController.shared.documents {
@@ -36,6 +37,15 @@ enum SelfTest {
             failures += 1
             print("FAIL \(name)")
         }
+    }
+
+    /// Focus only exists in the key window. When macOS keeps another app in front, say so instead of failing.
+    static func checkWhenKey(_ window: NSWindow?, _ name: String, _ condition: @autoclosure () -> Bool) {
+        guard window?.isKeyWindow == true else {
+            print("SKIP \(name): the window is not key, so focus cannot be checked")
+            return
+        }
+        check(name, condition())
     }
 
     /// Finds a menu item by title anywhere in the main menu.
@@ -100,6 +110,17 @@ enum SelfTest {
         try? await Task.sleep(for: .seconds(0.8))
         check("opening and closing Authorization leaves the request unedited", !document.isDocumentEdited)
 
+        // ⌘L focuses the URL field in the toolbar: the field editor then holds the URL.
+        if let window = session.window {
+            Snapshot.bringForward(window, within: 6)
+        }
+        if let item = menuItem("Select URL Field"), let action = item.action {
+            NSApp.sendAction(action, to: item.target, from: item)
+            try? await Task.sleep(for: .seconds(0.4))
+        }
+        let editor = session.window?.firstResponder as? NSTextView
+        checkWhenKey(session.window, "⌘L focuses the URL field", editor?.isFieldEditor == true && editor?.string == SeedData.request.urlString)
+
         var invalid = SeedData.request
         invalid.urlString = "http://"
         session.send(invalid)
@@ -107,6 +128,20 @@ enum SelfTest {
         check("an invalid URL shows its error in the response pane", session.buildError?.contains("not a valid URL") == true)
         check("an invalid URL opens no alert", NSApp.modalWindow == nil && !NSApp.windows.contains { $0 is NSPanel && $0.isVisible })
         session.buildError = nil
+    }
+
+    /// A new, empty request opens with its URL field focused, ready for typing.
+    private static func checkNewRequestFocus() async {
+        let before = Snapshot.sessions.count
+        NSDocumentController.shared.newDocument(nil)
+        try? await Task.sleep(for: .seconds(1))
+        guard Snapshot.sessions.count > before, let window = Snapshot.sessions.last?.window else {
+            check("a new request opens a window", false)
+            return
+        }
+        Snapshot.bringForward(window, within: 6)
+        let editor = window.firstResponder as? NSTextView
+        checkWhenKey(window, "a new request focuses its URL field", editor?.isFieldEditor == true && editor?.string.isEmpty == true)
     }
 
     private static func checkSymbols() {

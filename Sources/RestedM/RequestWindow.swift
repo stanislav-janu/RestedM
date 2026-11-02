@@ -1,5 +1,6 @@
 import RestedCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct RequestWindow: View {
     @Binding var request: RestRequest
@@ -134,7 +135,9 @@ struct RequestWindow: View {
         if let text = exchange.bodyText {
             NSPasteboard.general.setString(text, forType: .string)
         } else {
-            NSPasteboard.general.setData(exchange.body, forType: NSPasteboard.PasteboardType(exchange.contentType.isEmpty ? "public.data" : exchange.contentType))
+            let mime = exchange.contentType.split(separator: ";").first.map(String.init) ?? ""
+            let type = UTType(mimeType: mime.trimmingCharacters(in: .whitespaces)) ?? .data
+            NSPasteboard.general.setData(exchange.body, forType: NSPasteboard.PasteboardType(type.identifier))
         }
     }
 

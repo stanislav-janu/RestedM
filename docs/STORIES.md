@@ -2,7 +2,7 @@
 
 Built from `docs/BRIEF.md`. RESTed 2.7 is not installed, so `Screens:` names the snapshot pages that will show each story (`build/snapshots/<page>-light.png` and `-dark.png`, written by `scripts/snap.sh`), not reference screenshots.
 
-Snapshot pages: `request-empty`, `request-filled`, `response-body`, `response-headers`, `response-sent`, `response-404`, `response-error`, `authorization-sheet`, `settings`, `environments`, `history`, `curl-import`.
+Snapshot pages: `request-empty`, `request-filled`, `response-body`, `response-headers`, `response-sent`, `response-404`, `response-error`, `request-body`, `request-invalid`, `authorization-sheet`, `settings`, `environments`, `history`, `curl-import`.
 
 ## M1 Core loop (built before the backlog existed)
 
@@ -95,7 +95,8 @@ UX:
 - States: new empty request focuses the URL field; a saved request opens with nothing focused; while sending, Send Request turns into Stop Request
 - Words: URL placeholder "Enter a URL", Send button "Send Request", tooltips "Send the request (⌘R)" and "Stop the request (⌘R)", method picker label "Method"
 - Access: VoiceOver "Method, GET, pop-up button", "URL, text field"; the toolbar folds into the overflow menu when narrow, Send stays visible
-Status: done
+Status: doing
+Note: built and snapshotted. Focus is unverified: ⌘L and a new request focusing the URL need a key window, and the self-test reports SKIP while another RestedM is running. Run `scripts/selftest.sh` with RestedM quit.
 
 ### S-018 Request options in the toolbar and Request menu
 As the user, I reach Authorization, string encoding and Follow Redirects from the Request menu and a toolbar options menu, not from a bar on the bottom edge.
@@ -196,6 +197,7 @@ Screens: request-filled, response-body
 Acceptance:
 - [snap] GET, POST, PUT, PATCH and DELETE each have their own tint; others use the accent color.
 - [snap] Text on the tint uses the on-accent token and passes 4.5:1 in light and dark mode.
+Note: the toolbar method control is a menu with a tinted label; that it opens and lists the methods is checked by hand only.
 Status: done
 
 ## M3 Environments

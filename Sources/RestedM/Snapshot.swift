@@ -173,7 +173,7 @@ enum Snapshot {
     /// Makes the window key in the active app, like a window someone is using:
     /// real accent colors and colored traffic lights. Returns whether that worked in time.
     @discardableResult
-    private static func bringForward(_ window: NSWindow, within seconds: TimeInterval) -> Bool {
+    static func bringForward(_ window: NSWindow, within seconds: TimeInterval) -> Bool {
         // Another app can hide this one while snapshots run. Hidden windows cannot be captured.
         if NSApp.isHidden {
             NSApp.unhideWithoutActivation()
@@ -185,6 +185,7 @@ enum Snapshot {
         if !NSApp.isActive {
             let script = Process()
             script.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+            // While another RestedM runs, this may bring that one forward instead; the capture then warns.
             script.arguments = ["-e", "tell application id \"\(Bundle.main.bundleIdentifier ?? "")\" to activate"]
             // No waitUntilExit: the event comes back to this app, so the run loop below must answer it.
             try? script.run()

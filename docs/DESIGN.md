@@ -51,7 +51,7 @@ Snapshots of the current window: request filled, response body, light appearance
 | --- | --- | --- | --- |
 | 1 | Method, URL and Send sit in a custom bar under the title bar instead of the window toolbar. | 2, 16 | fixed: S-017 |
 | 2 | Authorization, Encoding and Follow Redirects sit on the bottom edge of the window. | 64 | fixed: S-018 |
-| 3 | The method picker shows a focus ring when a saved document opens (seen on a fresh launch). | 51 | fixed: S-017 |
+| 3 | The method picker shows a focus ring when a saved document opens (seen on a fresh launch). | 51 | fixed in snapshots; focus checks pending, S-017 |
 | 4 | Headers take half the editor height for two rows, leaving a large empty band. | 27, review set | fixed: S-019 |
 | 5 | The disabled body editor shows at full size while "Use Custom HTTP Body" is off. | 27 | fixed: S-019 |
 | 6 | The method badge in the response summary is fixed white text on the accent fill. | 41, 50 | fixed: `Palette.onAccent` |

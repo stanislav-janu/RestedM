@@ -8,8 +8,7 @@ set -u
 cd "${0:A:h}/.."
 app=build/RestedM.app/Contents/MacOS/RestedM
 shots=$PWD/build/snapshots
-pkill -x RestedM
-while pgrep -x RestedM >/dev/null; do sleep 0.2; done
+# Runs as its own process next to any RestedM in use, which it never quits or activates.
 rm -rf $shots
 # Fixed display settings in the argument domain, so the user's own defaults stay untouched.
 RESTEDM_SNAPSHOT=$shots $app -ApplePersistenceIgnoreState YES \

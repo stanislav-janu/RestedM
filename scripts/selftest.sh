@@ -4,6 +4,5 @@
 set -u
 cd "${0:A:h}/.."
 app=build/RestedM.app/Contents/MacOS/RestedM
-pkill -x RestedM
-while pgrep -x RestedM >/dev/null; do sleep 0.2; done
+# Runs as its own process next to any RestedM in use, which it never quits or activates.
 RESTEDM_SELFTEST=1 $app -ApplePersistenceIgnoreState YES
