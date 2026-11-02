@@ -11,6 +11,8 @@ final class RequestSession {
     /// The response tab picked in this window; nil follows the default from Settings.
     var responseTab: ResponseTab?
     var showsAuthorization = false
+    /// Why the last Send Request could not build a request; shown in the response pane.
+    var buildError: String?
     @ObservationIgnored weak var window: NSWindow?
 
     private var sendTask: Task<Void, Never>?
@@ -37,9 +39,10 @@ final class RequestSession {
         do {
             built = try RequestBuilder(request: request, options: options).build()
         } catch {
-            presentError(error)
+            buildError = error.localizedDescription
             return
         }
+        buildError = nil
         let id = UUID()
         sendID = id
         sendTask = Task {
@@ -64,12 +67,5 @@ final class RequestSession {
         sendTask?.cancel()
         sendTask = nil
         sendID = nil
-    }
-
-    private func presentError(_ error: Error) {
-        let alert = NSAlert()
-        alert.messageText = "The request could not be sent."
-        alert.informativeText = error.localizedDescription
-        alert.runModal()
     }
 }

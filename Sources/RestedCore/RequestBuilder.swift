@@ -29,7 +29,7 @@ public enum RequestBuilderError: Error, LocalizedError {
         case .missingURL:
             return "Enter a URL to send the request to."
         case .invalidURL(let url):
-            return "“\(url)” is not a valid URL."
+            return "“\(url)” is not a valid URL. Check the host name for typos or spaces."
         }
     }
 }
@@ -141,6 +141,22 @@ public struct RequestBuilder {
             urlRequest.addValue(header.value, forHTTPHeaderField: header.name)
         }
         return BuiltRequest(urlRequest: urlRequest, headers: headers, credential: credential)
+    }
+
+    /// The URL exactly as `build()` sends it, or nil when it cannot be built.
+    public var resolvedURL: String? {
+        (try? build())?.urlRequest.url?.absoluteString
+    }
+
+    /// Names of `{{name}}` placeholders in the URL that no enabled parameter fills.
+    public var unresolvedPlaceholders: [String] {
+        let template = request.urlString
+        let source = template as NSString
+        let names = Self.placeholderPattern.matches(in: template, range: NSRange(location: 0, length: source.length))
+            .map { source.substring(with: $0.range(at: 1)) }
+        let filled = Set(activeParameters.map(\.name))
+        var seen = Set<String>()
+        return names.filter { !filled.contains($0) && seen.insert($0).inserted }
     }
 
     func expandPlaceholders(in template: String) -> (String, Set<String>) {

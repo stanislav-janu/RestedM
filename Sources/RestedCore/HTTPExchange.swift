@@ -12,6 +12,8 @@ public struct HTTPExchange {
     public var body: Data
     public var elapsed: TimeInterval
     public var errorMessage: String?
+    /// The URLError code of a failed send, for a hint on how to fix it.
+    public var errorCode: Int?
 
     public init(
         method: String,
@@ -22,7 +24,8 @@ public struct HTTPExchange {
         response: HTTPURLResponse?,
         body: Data,
         elapsed: TimeInterval,
-        errorMessage: String?
+        errorMessage: String?,
+        errorCode: Int? = nil
     ) {
         self.method = method
         self.url = url
@@ -33,6 +36,7 @@ public struct HTTPExchange {
         self.body = body
         self.elapsed = elapsed
         self.errorMessage = errorMessage
+        self.errorCode = errorCode
     }
 
     public var statusLine: String? {
@@ -215,6 +219,7 @@ public final class HTTPClient: NSObject, URLSessionTaskDelegate {
             exchange.body = data
         } catch {
             exchange.errorMessage = error.localizedDescription
+            exchange.errorCode = (error as? URLError)?.errorCode
         }
         exchange.elapsed = Date().timeIntervalSince(start)
         return exchange

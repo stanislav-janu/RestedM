@@ -17,6 +17,7 @@ enum Snapshot {
         case responseSent = "response-sent"
         case response404 = "response-404"
         case responseError = "response-error"
+        case requestInvalid = "request-invalid"
         case authorizationSheet = "authorization-sheet"
         case settings
     }
@@ -91,17 +92,27 @@ enum Snapshot {
         switch page {
         case .requestEmpty, .requestFilled:
             session?.exchange = nil
+            session?.buildError = nil
         case .responseBody, .responseHeaders, .responseSent:
+            session?.buildError = nil
             session?.exchange = SeedData.okExchange
             session?.responseTab = page == .responseBody ? .body : page == .responseHeaders ? .headers : .request
         case .response404:
+            session?.buildError = nil
             session?.exchange = SeedData.notFoundExchange
             session?.responseTab = .body
         case .responseError:
+            session?.buildError = nil
             session?.exchange = SeedData.errorExchange
             session?.responseTab = .body
+        case .requestInvalid:
+            session?.exchange = nil
+            var invalid = SeedData.request
+            invalid.urlString = "http://"
+            session?.send(invalid)
         case .authorizationSheet:
             session?.exchange = nil
+            session?.buildError = nil
             session?.showsAuthorization = true
         case .settings:
             openSettings?()

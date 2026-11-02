@@ -19,7 +19,7 @@ struct RequestWindow: View {
         HSplitView {
             RequestEditor(request: $request)
                 .frame(minWidth: Metrics.editorMinWidth, idealWidth: Metrics.editorIdealWidth, maxHeight: .infinity)
-            ResponsePane(exchange: session.exchange, isSending: session.isSending, tab: $session.responseTab)
+            ResponsePane(exchange: session.exchange, buildError: session.buildError, isSending: session.isSending, tab: $session.responseTab)
                 .frame(minWidth: Metrics.responseMinWidth, idealWidth: Metrics.responseIdealWidth, maxHeight: .infinity)
         }
         .frame(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight)

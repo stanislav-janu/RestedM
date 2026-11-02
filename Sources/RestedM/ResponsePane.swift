@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ResponsePane: View {
     let exchange: HTTPExchange?
+    let buildError: String?
     let isSending: Bool
     @Binding var tab: ResponseTab?
 
@@ -20,7 +21,13 @@ struct ResponsePane: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let exchange {
+            if let buildError, !isSending {
+                ContentUnavailableView {
+                    Label("Unable to Send Request", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(buildError)
+                }
+            } else if let exchange {
                 summary(exchange)
                 Divider()
                 Picker("View", selection: selectedTab) {
@@ -32,10 +39,18 @@ struct ResponsePane: View {
                 .labelsHidden()
                 .padding(.horizontal, Space.pane)
                 .padding(.vertical, Space.sm)
-                CodeTextView(
-                    text: ResponseRenderer.render(exchange, tab: selectedTab.wrappedValue, pretty: prettyPrint, highlight: highlightSyntax),
-                    showsLineNumbers: lineNumbers
-                )
+                if exchange.response == nil && selectedTab.wrappedValue == .body {
+                    ContentUnavailableView {
+                        Label(exchange.errorMessage ?? "No Response", systemImage: "xmark.octagon")
+                    } description: {
+                        Text(NetworkErrorHint.text(for: exchange.errorCode))
+                    }
+                } else {
+                    CodeTextView(
+                        text: ResponseRenderer.render(exchange, tab: selectedTab.wrappedValue, pretty: prettyPrint, highlight: highlightSyntax),
+                        showsLineNumbers: lineNumbers
+                    )
+                }
             } else if isSending {
                 ProgressView("Waiting for response…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -78,11 +93,10 @@ struct ResponsePane: View {
                     Text(status)
                         .font(.callout.bold())
                         .foregroundStyle(Palette.status(code))
-                } else if let error = exchange.errorMessage {
-                    Label(error, systemImage: "xmark.octagon.fill")
-                        .font(.callout)
+                } else {
+                    Label("No Response", systemImage: "xmark.octagon.fill")
+                        .font(.callout.bold())
                         .foregroundStyle(Color(nsColor: StatusColors.serverError))
-                        .lineLimit(2)
                 }
                 Text("Response time: \(formatted(exchange.elapsed))")
                     .font(.system(.caption, design: .monospaced))
@@ -103,5 +117,25 @@ struct ResponsePane: View {
             return "\(Int((interval * 1000).rounded())) ms"
         }
         return String(format: "%.2f s", interval)
+    }
+}
+
+/// How to fix a failed send, by URLError code.
+enum NetworkErrorHint {
+    static func text(for code: Int?) -> String {
+        switch code.map(URLError.Code.init(rawValue:)) {
+        case .cannotConnectToHost?, .cannotFindHost?, .dnsLookupFailed?:
+            return "Check that the server is running and that the URL and port are right."
+        case .timedOut?:
+            return "The server did not answer in time. Try again, or raise the timeout in Settings."
+        case .notConnectedToInternet?, .networkConnectionLost?:
+            return "Check the network connection of this Mac."
+        case .serverCertificateUntrusted?, .serverCertificateHasBadDate?, .serverCertificateHasUnknownRoot?, .serverCertificateNotYetValid?:
+            return "The server's certificate is not trusted. If you trust this server, allow self-signed certificates in Settings."
+        case .appTransportSecurityRequiresSecureConnection?:
+            return "macOS blocked this plain HTTP connection. Use https:// if the server supports it."
+        default:
+            return "Check the URL and try again."
+        }
     }
 }

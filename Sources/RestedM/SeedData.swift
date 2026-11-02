@@ -47,6 +47,7 @@ enum SeedData {
     static var errorExchange: HTTPExchange {
         var exchange = exchange(status: nil, elapsed: 0.012, contentType: nil, body: "")
         exchange.errorMessage = "Could not connect to the server."
+        exchange.errorCode = URLError.cannotConnectToHost.rawValue
         return exchange
     }
 

@@ -10,6 +10,7 @@ struct RequestEditor: View {
         GeometryReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
+                    ResolvedURLLine(request: request)
                     section("Headers") {
                         KeyValueEditor(
                             rows: $request.headers,
@@ -141,6 +142,42 @@ struct RequestEditor: View {
             .padding(.horizontal, Space.pane)
             .padding(.top, Space.md)
             content()
+        }
+    }
+}
+
+/// What the request will be sent to after placeholders and query parameters, shown only when
+/// that differs from the typed URL, plus a warning for each placeholder without a value.
+struct ResolvedURLLine: View {
+    let request: RestRequest
+
+    var body: some View {
+        let builder = RequestBuilder(request: request, options: SendOptions())
+        let resolved = builder.resolvedURL
+        let missing = builder.unresolvedPlaceholders
+        if (resolved != nil && resolved != request.urlString.trimmingCharacters(in: .whitespacesAndNewlines)) || !missing.isEmpty {
+            VStack(alignment: .leading, spacing: Space.xs) {
+                if let resolved, missing.isEmpty {
+                    HStack(alignment: .firstTextBaseline, spacing: Space.sm) {
+                        Text("Sends to")
+                            .foregroundStyle(.secondary)
+                        Text(resolved)
+                            .font(.system(.callout, design: .monospaced))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .textSelection(.enabled)
+                            .help(resolved)
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                ForEach(missing, id: \.self) { name in
+                    Label("No value for {{\(name)}}", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(Palette.warning)
+                }
+            }
+            .font(.callout)
+            .padding(.horizontal, Space.pane)
+            .padding(.top, Space.md)
         }
     }
 }

@@ -129,14 +129,14 @@ As the user, when a request cannot be built (bad URL, bad JSON parameter), I see
 Screens: response-error
 Acceptance:
 - [snap] The pane shows the error with an icon, the failing part and a hint, styled like a network error.
-- [self] Sending "http://exa mple.com" shows the error and no alert window opens.
+- [self] Sending "http://" shows the error and no alert window opens.
 UX:
 - Flow: ⌘R with a URL that cannot be built -> the response pane shows why -> fix the URL -> ⌘R sends and the message goes away
 - Surface: inline in the response pane (information next to the problem, no alert)
 - States: request error: `ContentUnavailableView` "Unable to Send Request" with the reason and the fix; network error: status line "No Response" with the octagon icon once, the body area says what happened and how to fix it
 - Words: "Enter a URL to send the request to.", "“http://” is not a valid URL. Check the host name for typos or spaces.", "Could not connect to the server. Check that it is running and that the URL and port are right."
 - Access: the message is plain text VoiceOver reads; color always comes with the icon
-Status: todo
+Status: done
 
 ### S-011 See the final URL before sending
 As the user, I see at the top of the request editor what will be sent after `{{name}}` substitution and query parameters.
@@ -152,7 +152,7 @@ UX:
 - States: hidden when the resolved URL equals the typed one; secondary monospaced "Sends to https://…" otherwise; orange triangle "No value for {{name}}" when a placeholder has no parameter
 - Words: "Sends to", "No value for {{name}}"; the full URL in a tooltip when it is truncated in the middle
 - Access: text is selectable; VoiceOver reads "Sends to" and the URL
-Status: todo
+Status: done
 
 ### S-012 Edit the body with highlighting
 As the user, I type a JSON or XML body in an editor with monospaced text, syntax highlighting and an invalid-JSON marker.

@@ -160,3 +160,20 @@ private func body(_ built: BuiltRequest) -> String {
     #expect(!HTTPClient.protectionSpace(space("api.test", 8080, "http"), belongsTo: origin))
     #expect(!HTTPClient.protectionSpace(space("api.test", 443, "https"), belongsTo: origin))
 }
+
+@Test func resolvedURLMatchesTheBuiltRequest() throws {
+    var request = RestRequest()
+    request.urlString = "api.example.com/users/{{id}}"
+    request.parameters = [KeyValueRow(name: "id", value: "42"), KeyValueRow(name: "include", value: "teams,roles")]
+    let builder = RequestBuilder(request: request, options: SendOptions())
+    #expect(builder.resolvedURL == (try builder.build()).urlRequest.url?.absoluteString)
+    #expect(builder.resolvedURL == "http://api.example.com/users/42?include=teams%2Croles")
+    #expect(builder.unresolvedPlaceholders.isEmpty)
+}
+
+@Test func unresolvedPlaceholdersAreListedOnce() {
+    var request = RestRequest()
+    request.urlString = "https://example.com/{{org}}/{{id}}/{{org}}"
+    request.parameters = [KeyValueRow(name: "id", value: "1"), KeyValueRow(enabled: false, name: "org", value: "x")]
+    #expect(RequestBuilder(request: request, options: SendOptions()).unresolvedPlaceholders == ["org"])
+}

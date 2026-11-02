@@ -92,6 +92,14 @@ enum SelfTest {
         session.showsAuthorization = false
         try? await Task.sleep(for: .seconds(0.8))
         check("opening and closing Authorization leaves the request unedited", !document.isDocumentEdited)
+
+        var invalid = SeedData.request
+        invalid.urlString = "http://"
+        session.send(invalid)
+        try? await Task.sleep(for: .seconds(0.5))
+        check("an invalid URL shows its error in the response pane", session.buildError?.contains("not a valid URL") == true)
+        check("an invalid URL opens no alert", NSApp.modalWindow == nil && !NSApp.windows.contains { $0 is NSPanel && $0.isVisible })
+        session.buildError = nil
     }
 
     private static func checkSymbols() {
