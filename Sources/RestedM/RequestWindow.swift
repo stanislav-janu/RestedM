@@ -5,28 +5,51 @@ struct RequestWindow: View {
     @Binding var request: RestRequest
 
     @State private var session = RequestSession()
+    /// A new, empty request focuses its URL; a saved one opens with nothing focused.
+    @State private var startsEmpty: Bool
     @FocusState private var urlFocused: Bool
     @Environment(\.openSettings) private var openSettings
 
+    init(request: Binding<RestRequest>) {
+        _request = request
+        _startsEmpty = State(initialValue: request.wrappedValue.urlString.isEmpty)
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            urlBar
-            Divider()
-            HSplitView {
-                RequestEditor(request: $request, showsAuthorization: $session.showsAuthorization)
-                    .frame(minWidth: Metrics.editorMinWidth, idealWidth: Metrics.editorIdealWidth, maxHeight: .infinity)
-                ResponsePane(exchange: session.exchange, isSending: session.isSending, tab: $session.responseTab)
-                    .frame(minWidth: Metrics.responseMinWidth, idealWidth: Metrics.responseIdealWidth, maxHeight: .infinity)
-            }
-            .frame(maxHeight: .infinity)
+        HSplitView {
+            RequestEditor(request: $request, showsAuthorization: $session.showsAuthorization)
+                .frame(minWidth: Metrics.editorMinWidth, idealWidth: Metrics.editorIdealWidth, maxHeight: .infinity)
+            ResponsePane(exchange: session.exchange, isSending: session.isSending, tab: $session.responseTab)
+                .frame(minWidth: Metrics.responseMinWidth, idealWidth: Metrics.responseIdealWidth, maxHeight: .infinity)
         }
         .frame(minWidth: Metrics.windowMinWidth, minHeight: Metrics.windowMinHeight)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                addressBar
+            }
+            ToolbarItemGroup(placement: .primaryAction) {
+                authorizationButton
+                Menu {
+                    RequestOptionsMenuContent(request: $request)
+                } label: {
+                    Label("Request Options", systemImage: "slider.horizontal.3")
+                }
+                .help("Choose the text encoding and whether to follow redirects")
+            }
+            ToolbarSpacer(.fixed, placement: .primaryAction)
+            ToolbarItem(placement: .primaryAction) {
+                sendButton
+            }
+        }
         .background(WindowReader { session.window = $0 })
+        .noInitialFocus(!startsEmpty || Snapshot.isActive)
         .sheet(isPresented: $session.showsAuthorization) {
             AuthorizationSheet(request: $request)
         }
+        .focusedSceneValue(\.request, $request)
         .focusedSceneValue(\.requestActions, RequestActions(
             send: { session.toggleSend(request) },
+            showAuthorization: { session.showsAuthorization = true },
             focusURL: { urlFocused = true },
             exportLast: exportLast,
             canExport: session.exchange != nil,
@@ -35,13 +58,14 @@ struct RequestWindow: View {
         .onAppear {
             if Snapshot.isActive || SelfTest.isActive {
                 Snapshot.register(session, openSettings: openSettings)
-            } else if request.urlString.isEmpty {
+            } else if startsEmpty {
                 urlFocused = true
             }
         }
     }
 
-    private var urlBar: some View {
+    /// Method and URL, one toolbar group that takes the free width.
+    private var addressBar: some View {
         HStack(spacing: Space.sm) {
             Picker("Method", selection: $request.method) {
                 ForEach(methodChoices, id: \.self) { method in
@@ -49,28 +73,42 @@ struct RequestWindow: View {
                 }
             }
             .labelsHidden()
-            .frame(width: Metrics.methodPickerWidth)
+            .fixedSize()
+            .help("Choose the HTTP method")
 
-            TextField("http://localhost:3000/", text: $request.urlString)
+            TextField("URL", text: $request.urlString, prompt: Text("Enter a URL"))
                 .textFieldStyle(.roundedBorder)
                 .font(.system(.body, design: .monospaced))
                 .focused($urlFocused)
                 .onSubmit { session.send(request) }
-
-            Button {
-                session.toggleSend(request)
-            } label: {
-                if session.isSending {
-                    Label("Stop", systemImage: "stop.fill")
-                } else {
-                    Label("Send Request", systemImage: "paperplane.fill")
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .help("Send Request (⌘R)")
+                .frame(minWidth: Metrics.urlFieldMinWidth, idealWidth: Metrics.urlFieldIdealWidth, maxWidth: .infinity)
         }
-        .padding(.horizontal, Space.pane)
-        .padding(.vertical, Space.sm)
+    }
+
+    private var authorizationButton: some View {
+        Button {
+            session.showsAuthorization = true
+        } label: {
+            Label("Authorization", systemImage: request.hasCredentials ? "lock.fill" : "lock.open")
+        }
+        .help(request.hasCredentials
+            ? "Basic authorization as \(request.username) (⌥⌘A)"
+            : "Set a username and password for Basic authorization (⌥⌘A)")
+    }
+
+    private var sendButton: some View {
+        Button {
+            session.toggleSend(request)
+        } label: {
+            if session.isSending {
+                Label("Stop Request", systemImage: "stop.fill")
+            } else {
+                Label("Send Request", systemImage: "paperplane.fill")
+            }
+        }
+        .labelStyle(.titleAndIcon)
+        .buttonStyle(.borderedProminent)
+        .help(session.isSending ? "Stop the request (⌘R)" : "Send the request (⌘R)")
     }
 
     private var methodChoices: [String] {

@@ -19,6 +19,7 @@ enum SelfTest {
             try? await Task.sleep(for: .seconds(1.5))
             checkMenus()
             checkSymbols()
+            await checkSeedDocument()
             print("SELFTEST \(failures == 0 ? "PASS" : "FAIL") (\(failures) failed)")
             let code: Int32 = failures == 0 ? 0 : 1
             for document in NSDocumentController.shared.documents {
@@ -59,6 +60,7 @@ enum SelfTest {
             ("Send Request", "r", [.command]),
             ("Select URL Field", "l", [.command]),
             ("Save Last Request & Response…", "s", [.command, .option]),
+            ("Authorization…", "a", [.command, .option]),
         ]
         for entry in expected {
             let item = menuItem(entry.title)
@@ -70,8 +72,30 @@ enum SelfTest {
         }
     }
 
+    /// Opens the seed request and checks what happens to it in a window.
+    private static func checkSeedDocument() async {
+        check("menu Follow Redirects exists", menuItem("Follow Redirects") != nil)
+        check("menu Text Encoding exists", menuItem("Text Encoding") != nil)
+        guard let url = try? SeedData.writeRequestFile(),
+              let document = try? await NSDocumentController.shared.openDocument(withContentsOf: url, display: true).0 else {
+            check("seed request opens", false)
+            return
+        }
+        try? await Task.sleep(for: .seconds(1))
+        guard let session = Snapshot.sessions.last else {
+            check("seed request window registers its session", false)
+            return
+        }
+        session.showsAuthorization = true
+        try? await Task.sleep(for: .seconds(0.8))
+        check("authorization sheet opens", session.window?.attachedSheet != nil)
+        session.showsAuthorization = false
+        try? await Task.sleep(for: .seconds(0.8))
+        check("opening and closing Authorization leaves the request unedited", !document.isDocumentEdited)
+    }
+
     private static func checkSymbols() {
-        let symbols = ["paperplane.fill", "stop.fill", "lock.fill", "lock.open", "minus.circle", "plus", "exclamationmark.triangle", "xmark.octagon.fill"]
+        let symbols = ["paperplane.fill", "stop.fill", "lock.fill", "lock.open", "minus.circle", "plus", "exclamationmark.triangle", "xmark.octagon.fill", "slider.horizontal.3"]
         for name in symbols {
             check("symbol \(name) exists", NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil)
         }

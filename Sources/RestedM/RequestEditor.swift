@@ -23,8 +23,6 @@ struct RequestEditor: View {
                     .frame(minHeight: 160, maxHeight: .infinity)
             }
             .frame(maxHeight: .infinity)
-            Divider()
-            optionsBar
         }
     }
 
@@ -114,34 +112,6 @@ struct RequestEditor: View {
         }
     }
 
-    private var optionsBar: some View {
-        HStack(spacing: Space.md) {
-            Button {
-                showsAuthorization = true
-            } label: {
-                Label(request.hasCredentials ? "Authorization: \(request.username)" : "Authorization…", systemImage: request.hasCredentials ? "lock.fill" : "lock.open")
-            }
-            .lineLimit(1)
-
-            Picker("Encoding", selection: $request.stringEncoding) {
-                Text("UTF-8").tag(String.Encoding.utf8.rawValue)
-                Text("ISO Latin-1").tag(String.Encoding.isoLatin1.rawValue)
-                Text("ASCII").tag(String.Encoding.ascii.rawValue)
-                if ![String.Encoding.utf8, .isoLatin1, .ascii].map(\.rawValue).contains(request.stringEncoding) {
-                    Text("Encoding \(request.stringEncoding)").tag(request.stringEncoding)
-                }
-            }
-            .fixedSize()
-
-            Spacer()
-
-            Toggle("Follow Redirects", isOn: $request.followRedirects)
-        }
-        .controlSize(.small)
-        .padding(.horizontal, Space.pane)
-        .padding(.vertical, Space.sm)
-    }
-
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         section(title, accessory: { EmptyView() }, content: content)
     }
@@ -165,30 +135,44 @@ struct RequestEditor: View {
     }
 }
 
+/// Edits a copy of the credentials, so opening and closing the sheet never edits the request.
 struct AuthorizationSheet: View {
     @Binding var request: RestRequest
     @Environment(\.dismiss) private var dismiss
+    @State private var draft: Credentials
+
+    init(request: Binding<RestRequest>) {
+        _request = request
+        _draft = State(initialValue: Credentials(request.wrappedValue))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Space.lg) {
             Text("Basic Authorization")
                 .font(.title3.bold())
             Form {
-                TextField("Username", text: $request.username)
-                SecureField("Password", text: $request.password)
-                Toggle("Remember password (stored as plain text in the document)", isOn: $request.storePassword)
-                Toggle("Send credentials before the authentication challenge", isOn: $request.presentBeforeChallenge)
+                TextField("Username", text: $draft.username)
+                SecureField("Password", text: $draft.password)
+                Toggle(isOn: $draft.storePassword) {
+                    Text("Remember password")
+                    Text("Saved as plain text in the request file.")
+                }
+                Toggle("Send before the server asks", isOn: $draft.presentBeforeChallenge)
             }
             HStack {
                 Button("Clear", role: .destructive) {
-                    request.username = ""
-                    request.password = ""
-                    request.storePassword = false
-                    request.presentBeforeChallenge = false
+                    draft = Credentials()
                 }
-                .disabled(!request.hasCredentials && request.password.isEmpty)
+                .disabled(draft == Credentials())
                 Spacer()
+                Button("Cancel", role: .cancel) {
+                    dismiss()
+                }
+                .keyboardShortcut(.cancelAction)
                 Button("OK") {
+                    if draft != Credentials(request) {
+                        draft.apply(to: &request)
+                    }
                     dismiss()
                 }
                 .keyboardShortcut(.defaultAction)
@@ -196,5 +180,30 @@ struct AuthorizationSheet: View {
         }
         .padding(Space.xl)
         .frame(width: Metrics.sheetWidth)
+        .noInitialFocus(!draft.username.isEmpty)
+    }
+}
+
+/// The Basic authorization fields of a request.
+struct Credentials: Equatable {
+    var username = ""
+    var password = ""
+    var storePassword = false
+    var presentBeforeChallenge = false
+
+    init() {}
+
+    init(_ request: RestRequest) {
+        username = request.username
+        password = request.password
+        storePassword = request.storePassword
+        presentBeforeChallenge = request.presentBeforeChallenge
+    }
+
+    func apply(to request: inout RestRequest) {
+        request.username = username
+        request.password = password
+        request.storePassword = storePassword
+        request.presentBeforeChallenge = presentBeforeChallenge
     }
 }

@@ -78,6 +78,7 @@ struct RestedMApp: App {
 
 struct RequestActions {
     var send: () -> Void
+    var showAuthorization: () -> Void
     var focusURL: () -> Void
     var exportLast: () -> Void
     var canExport: Bool
@@ -97,6 +98,7 @@ extension FocusedValues {
 
 struct RequestCommands: Commands {
     @FocusedValue(\.requestActions) private var actions
+    @FocusedValue(\.request) private var request
 
     var body: some Commands {
         CommandGroup(after: .saveItem) {
@@ -118,6 +120,21 @@ struct RequestCommands: Commands {
             }
             .keyboardShortcut("l")
             .disabled(actions == nil)
+
+            Divider()
+
+            Button("Authorization…") {
+                actions?.showAuthorization()
+            }
+            .keyboardShortcut("a", modifiers: [.command, .option])
+            .disabled(actions == nil)
+
+            if let request {
+                RequestOptionsMenuContent(request: request)
+            } else {
+                Text("Text Encoding")
+                Text("Follow Redirects")
+            }
         }
     }
 }

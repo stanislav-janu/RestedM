@@ -27,7 +27,8 @@ enum Snapshot {
         directory != nil
     }
 
-    private static var sessions: [RequestSession] = []
+    /// Sessions of the windows open in an agent run, oldest first.
+    private(set) static var sessions: [RequestSession] = []
     private static var openSettings: OpenSettingsAction?
 
     static func register(_ session: RequestSession, openSettings: OpenSettingsAction) {

@@ -89,7 +89,13 @@ Acceptance:
 - [snap] The window shows the document title and the controls in a unified toolbar.
 - [snap] Command-L still focuses the URL field.
 - [snap] A saved document opens with no focus ring; only a new, empty document focuses the URL field.
-Status: todo
+UX:
+- Flow: open a request -> method and URL in the toolbar -> ⌘L focuses the URL -> Return or ⌘R sends -> the response replaces the pane
+- Surface: window toolbar (global actions of the window, mac-design "Toolbars"); three groups: method + URL, request options (S-018), Send Request
+- States: new empty request focuses the URL field; a saved request opens with nothing focused; while sending, Send Request turns into Stop Request
+- Words: URL placeholder "Enter a URL", Send button "Send Request", tooltips "Send the request (⌘R)" and "Stop the request (⌘R)", method picker label "Method"
+- Access: VoiceOver "Method, GET, pop-up button", "URL, text field"; the toolbar folds into the overflow menu when narrow, Send stays visible
+Status: done
 
 ### S-018 Request options in the toolbar and Request menu
 As the user, I reach Authorization, string encoding and Follow Redirects from the Request menu and a toolbar options menu, not from a bar on the bottom edge.
@@ -99,7 +105,13 @@ Acceptance:
 - [snap] The bottom options bar is gone; the window has no controls on its bottom edge.
 - [snap] The toolbar shows a lock symbol that is closed with a username set; its tooltip names the user.
 - [self] Request ▸ Authorization… (Option-Command-A) opens the sheet; Request ▸ Follow Redirects is a checkmark item.
-Status: todo
+UX:
+- Flow: lock button or Request ▸ Authorization… (⌥⌘A) -> sheet -> OK or Return closes, Escape cancels; options menu or Request ▸ Text Encoding / Follow Redirects -> checkmark changes at once
+- Surface: sheet for Authorization (one short task); a toolbar menu and the Request menu for Text Encoding and Follow Redirects (values on the request, menu checkmarks)
+- States: lock open "Authorization…" without a username, lock closed with tooltip "Basic authorization as demo"; the sheet focuses Username only when it is empty
+- Words: "Authorization…", "Text Encoding", "Follow Redirects", sheet title "Basic Authorization", toggles "Remember password" with the note "Saved as plain text in the request file." and "Send before the server asks"
+- Access: opening and closing the sheet without typing leaves the request unedited; VoiceOver reads the lock as "Authorization"
+Status: done
 
 ### S-019 Editor sections size to their content
 As the user, I see headers, parameters and body take the space their content needs, without large empty bands.
@@ -117,6 +129,12 @@ Screens: response-error
 Acceptance:
 - [snap] The pane shows the error with an icon, the failing part and a hint, styled like a network error.
 - [self] Sending "http://exa mple.com" shows the error and no alert window opens.
+UX:
+- Flow: ⌘R with a URL that cannot be built -> the response pane shows why -> fix the URL -> ⌘R sends and the message goes away
+- Surface: inline in the response pane (information next to the problem, no alert)
+- States: request error: `ContentUnavailableView` "Unable to Send Request" with the reason and the fix; network error: status line "No Response" with the octagon icon once, the body area says what happened and how to fix it
+- Words: "Enter a URL to send the request to.", "“http://” is not a valid URL. Check the host name for typos or spaces.", "Could not connect to the server. Check that it is running and that the URL and port are right."
+- Access: the message is plain text VoiceOver reads; color always comes with the icon
 Status: todo
 
 ### S-011 See the final URL before sending
@@ -127,6 +145,12 @@ Acceptance:
 - [snap] A secondary, monospaced line shows the resolved URL when it differs from the typed one.
 - [snap] An unresolved `{{name}}` is marked in orange with "No value for name".
 - [unit] The preview equals the URL `RequestBuilder` builds for the same request.
+UX:
+- Flow: type a URL with `{{id}}` or add a query parameter -> the line above the headers updates as you type
+- Surface: inline line at the top of the request editor column (shows a value derived from what is on screen)
+- States: hidden when the resolved URL equals the typed one; secondary monospaced "Sends to https://…" otherwise; orange triangle "No value for {{name}}" when a placeholder has no parameter
+- Words: "Sends to", "No value for {{name}}"; the full URL in a tooltip when it is truncated in the middle
+- Access: text is selectable; VoiceOver reads "Sends to" and the URL
 Status: todo
 
 ### S-012 Edit the body with highlighting

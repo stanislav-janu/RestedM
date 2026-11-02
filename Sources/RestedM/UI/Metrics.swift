@@ -8,7 +8,8 @@ enum Metrics {
     static let editorIdealWidth: CGFloat = 480
     static let responseMinWidth: CGFloat = 420
     static let responseIdealWidth: CGFloat = 560
-    static let methodPickerWidth: CGFloat = 104
+    static let urlFieldMinWidth: CGFloat = 200
+    static let urlFieldIdealWidth: CGFloat = 480
     static let rowNameMinWidth: CGFloat = 120
     static let rowNameMaxWidth: CGFloat = 220
     static let sheetWidth: CGFloat = 440
