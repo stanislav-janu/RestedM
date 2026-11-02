@@ -58,6 +58,11 @@ public struct RestRequest: Equatable {
         ["GET", "HEAD"].contains(method)
     }
 
+    /// GET, HEAD, DELETE and TRACE send their parameters in the query string when no custom body is used.
+    public var sendsParametersInURL: Bool {
+        ["GET", "HEAD", "DELETE", "TRACE"].contains(method)
+    }
+
     public var hasCredentials: Bool {
         !username.isEmpty
     }

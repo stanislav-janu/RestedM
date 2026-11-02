@@ -38,7 +38,6 @@ public enum RequestBuilderError: Error, LocalizedError {
 /// `{{name}}` placeholders in the URL take the value of the matching parameter,
 /// remaining parameters go to the query for GET/HEAD/DELETE/TRACE and to the body otherwise.
 public struct RequestBuilder {
-    static let queryMethods: Set<String> = ["GET", "HEAD", "DELETE", "TRACE"]
     static let placeholderPattern = try! NSRegularExpression(pattern: #"\{\{(\w+)\}\}"#)
 
     public let request: RestRequest
@@ -58,7 +57,7 @@ public struct RequestBuilder {
     }
 
     var appendsParametersToURL: Bool {
-        !usesCustomBody && Self.queryMethods.contains(request.method)
+        !usesCustomBody && request.sendsParametersInURL
     }
 
     var encoding: String.Encoding {

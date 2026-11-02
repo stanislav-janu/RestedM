@@ -134,7 +134,7 @@ struct RequestEditor: View {
 
     /// Where the parameters go while no custom body is set, as RequestBuilder decides.
     private var parametersDestination: String {
-        ["GET", "HEAD", "DELETE", "TRACE"].contains(request.method)
+        request.sendsParametersInURL
             ? "\(request.method) sends the parameters in the URL."
             : "The parameters are sent as the body."
     }

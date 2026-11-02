@@ -49,21 +49,21 @@ Snapshots of the current window: request filled, response body, light appearance
 
 | # | Finding | Rule | Story |
 | --- | --- | --- | --- |
-| 1 | Method, URL and Send sit in a custom bar under the title bar instead of the window toolbar. | 2, 16 | S-017 |
-| 2 | Authorization, Encoding and Follow Redirects sit on the bottom edge of the window. | 64 | S-018 |
-| 3 | The method picker shows a focus ring when a saved document opens (seen on a fresh launch). | 51 | S-017 |
-| 4 | Headers take half the editor height for two rows, leaving a large empty band. | 27, review set | S-019 |
-| 5 | The disabled body editor shows at full size while "Use Custom HTTP Body" is off. | 27 | S-019 |
+| 1 | Method, URL and Send sit in a custom bar under the title bar instead of the window toolbar. | 2, 16 | fixed: S-017 |
+| 2 | Authorization, Encoding and Follow Redirects sit on the bottom edge of the window. | 64 | fixed: S-018 |
+| 3 | The method picker shows a focus ring when a saved document opens (seen on a fresh launch). | 51 | fixed: S-017 |
+| 4 | Headers take half the editor height for two rows, leaving a large empty band. | 27, review set | fixed: S-019 |
+| 5 | The disabled body editor shows at full size while "Use Custom HTTP Body" is off. | 27 | fixed: S-019 |
 | 6 | The method badge in the response summary is fixed white text on the accent fill. | 41, 50 | fixed: `Palette.onAccent` |
 | 7 | JSON string green on the white response background is below 4.5:1 (2.1:1). | 50 | fixed: `CodeColors` |
-| 8 | Header and parameter rows have no context menu. | 33, 68 | S-014 |
-| 9 | Response tabs have no menu commands or shortcuts. | 17, 18 | S-013 |
-| 10 | Errors from building a request use a modal alert. | 25, 79 | S-010 |
-| 11 | A network error shows its message twice: in the summary and as the body. | 47 | S-010 |
-| 12 | The third parameter row is clipped behind the Add button. | review set | S-019 |
-| 13 | Opening the Authorization sheet marks the document as edited without a change. | 25 | S-018 |
-| 14 | The Authorization sheet focuses and selects the username, and truncates the "Remember password" label. | 51, 52 | S-018 |
-| 15 | Settings opens with a focus ring on the first switch. | 51 | S-019 |
-| 16 | The empty URL field's placeholder renders in the link color. | 28 | S-017 |
+| 8 | Header and parameter rows have no context menu. | 33, 68 | fixed: S-014 |
+| 9 | Response tabs have no menu commands or shortcuts. | 17, 18 | fixed: S-013 |
+| 10 | Errors from building a request use a modal alert. | 25, 79 | fixed: S-010 |
+| 11 | A network error shows its message twice: in the summary and as the body. | 47 | fixed: S-010 |
+| 12 | The third parameter row is clipped behind the Add button. | review set | fixed: S-019 |
+| 13 | Opening the Authorization sheet marks the document as edited without a change. | 25 | fixed: S-018 |
+| 14 | The Authorization sheet focuses and selects the username, and truncates the "Remember password" label. | 51, 52 | fixed: S-018 |
+| 15 | Settings opens with a focus ring on the first switch. | 51 | fixed: S-019 |
+| 16 | The empty URL field's placeholder renders in the link color. | 28 | fixed: S-017 |
 
 Holds already: one prominent action (Send), title names the document, status color paired with the status text, system scroll bars, find bar in the response, monospaced URL and code, Settings on Command-comma.

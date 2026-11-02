@@ -5,16 +5,20 @@ Native SwiftUI HTTP client for macOS 27+ on Apple Silicon, a drop-in replacement
 ## Build
 
 ```bash
-./scripts/build.sh
+make build
 ```
 
-The script produces an ad-hoc signed arm64 bundle at `build/RestedM.app` and registers it with Launch Services. Copy it to `/Applications` to install.
+Produces an ad-hoc signed arm64 bundle at `build/RestedM.app` and registers it with Launch Services. `make up` builds it, quits the running RestedM, replaces `/Applications/RestedM.app` and opens it again (`INSTALL_DIR=... make up` picks another folder).
+
+Other targets: `make run`, `make lint`, `make format`, `make snap`, `make selftest`, `make icon`, `make icon-review`.
 
 ## Tests
 
 ```bash
-swift test
+make test
 ```
+
+Runs `swift test` in debug and release.
 
 Optional checks against a local echo server and a folder of real `.request` documents:
 
@@ -38,4 +42,4 @@ RESTEDM_ECHO_URL=http://127.0.0.1:8765 RESTEDM_SAMPLES=/path/to/requests swift t
 - `Sources/RestedCore`: document format, request building, HTTP client, JSON formatting. No UI.
 - `Sources/RestedM`: SwiftUI app (document windows, editors, response view, settings).
 - `Icon/AppIcon.icon`: Icon Composer app icon. `scripts/make-icon.sh` compiles it, `scripts/icon-review.sh` renders a contact sheet of every look.
-- `scripts/`: bundle build script and icon tools.
+- `scripts/`: bundle build script, snapshots, self-test and icon tools. `Makefile` wraps them.
