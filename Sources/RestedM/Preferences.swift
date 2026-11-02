@@ -99,7 +99,7 @@ struct PreferencesView: View {
                         Slider(value: Binding(get: { Double(timeout) }, set: { timeout = Int($0) }), in: 2...180, step: 1)
                         Text("\(timeout) s")
                             .monospacedDigit()
-                            .frame(width: 44, alignment: .trailing)
+                            .frame(width: Metrics.timeoutLabelWidth, alignment: .trailing)
                     }
                 }
                 Toggle("Allow self-signed and unverified SSL certificates", isOn: $allowSelfSigned)
@@ -125,7 +125,8 @@ struct PreferencesView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 520)
+        .frame(width: Metrics.settingsWidth)
+        .noInitialFocus()
         .fixedSize(horizontal: false, vertical: true)
     }
 }

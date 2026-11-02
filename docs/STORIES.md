@@ -120,8 +120,9 @@ Depends: S-018
 Acceptance:
 - [snap] Two header rows take two rows of height plus the Add button; parameters and body get the rest.
 - [snap] With "Use Custom HTTP Body" off the body area shrinks to the toggle and one line saying parameters are sent.
-- [manual] The dividers still drag, and the chosen heights survive a relaunch.
-Status: todo
+- [snap] With more rows than fit, the whole column scrolls as one; the body editor keeps at least 120 pt.
+- [snap] Settings opens with nothing focused.
+Status: done
 
 ### S-010 See send errors in the response pane
 As the user, when a request cannot be built (bad URL, bad JSON parameter), I see why in the response pane instead of a modal alert.

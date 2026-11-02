@@ -1,28 +1,39 @@
 import RestedCore
 import SwiftUI
 
+/// Headers, parameters and body in one column. Lists take the height of their rows,
+/// the body editor takes the rest, and the whole column scrolls when it runs out of room.
 struct RequestEditor: View {
     @Binding var request: RestRequest
-    @Binding var showsAuthorization: Bool
 
     var body: some View {
-        VStack(spacing: 0) {
-            VSplitView {
-                section("Headers") {
-                    KeyValueEditor(
-                        rows: $request.headers,
-                        namePlaceholder: "Header Field",
-                        valuePlaceholder: "Header Value",
-                        nameSuggestions: { _ in HeaderCatalog.names },
-                        valueSuggestions: { HeaderCatalog.suggestions(for: $0) }
-                    )
+        GeometryReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    section("Headers") {
+                        KeyValueEditor(
+                            rows: $request.headers,
+                            namePlaceholder: "Header Field",
+                            valuePlaceholder: "Header Value",
+                            nameSuggestions: { _ in HeaderCatalog.names },
+                            valueSuggestions: { HeaderCatalog.suggestions(for: $0) }
+                        )
+                    }
+                    Divider()
+                    layoutPicker
+                    if layout.wrappedValue != .body {
+                        parametersSection
+                    }
+                    if layout.wrappedValue == .both {
+                        Divider()
+                    }
+                    if layout.wrappedValue != .parameters {
+                        bodySection
+                    }
                 }
-                .frame(minHeight: 90, idealHeight: 180, maxHeight: .infinity)
-
-                parametersAndBody
-                    .frame(minHeight: 160, maxHeight: .infinity)
+                .frame(minHeight: proxy.size.height, alignment: .top)
             }
-            .frame(maxHeight: .infinity)
+            .scrollBounceBehavior(.basedOnSize)
         }
     }
 
@@ -33,33 +44,17 @@ struct RequestEditor: View {
         )
     }
 
-    @ViewBuilder
-    private var parametersAndBody: some View {
-        VStack(spacing: 0) {
-            Picker("Show", selection: layout) {
-                ForEach(ParamBodyLayout.allCases) { layout in
-                    Text(layout.title).tag(layout)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding(.horizontal, Space.pane)
-            .padding(.top, Space.sm)
-
-            switch layout.wrappedValue {
-            case .both:
-                VSplitView {
-                    parametersSection
-                        .frame(minHeight: 80, maxHeight: .infinity)
-                    bodySection
-                        .frame(minHeight: 80, maxHeight: .infinity)
-                }
-            case .parameters:
-                parametersSection
-            case .body:
-                bodySection
+    private var layoutPicker: some View {
+        Picker("Show", selection: layout) {
+            ForEach(ParamBodyLayout.allCases) { layout in
+                Text(layout.title).tag(layout)
             }
         }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, Space.pane)
+        .padding(.top, Space.md)
     }
 
     private var parametersSection: some View {
@@ -88,28 +83,43 @@ struct RequestEditor: View {
         }
     }
 
+    @ViewBuilder
     private var bodySection: some View {
         section("HTTP Body", accessory: {
             Toggle("Use Custom HTTP Body", isOn: $request.usesCustomBody)
                 .controlSize(.small)
         }) {
-            TextEditor(text: $request.body)
-                .font(.system(size: 12, design: .monospaced))
-                .scrollContentBackground(.hidden)
-                .background(Color(nsColor: .textBackgroundColor))
-                .disabled(!request.usesCustomBody)
-                .opacity(request.usesCustomBody ? 1 : 0.5)
-                .autocorrectionDisabled()
-                .overlay(RoundedRectangle(cornerRadius: Radius.xs).stroke(Color(nsColor: .separatorColor)))
-                .padding(.horizontal, Space.pane)
-            if request.usesCustomBody && request.customBodyIsIgnored {
-                Label("\(request.method) requests cannot carry a body. Parameters are sent in the URL instead.", systemImage: "exclamationmark.triangle")
-                    .font(.caption)
-                    .foregroundStyle(Palette.warning)
+            if request.usesCustomBody {
+                TextEditor(text: $request.body)
+                    .font(.system(size: 12, design: .monospaced))
+                    .scrollContentBackground(.hidden)
+                    .background(Color(nsColor: .textBackgroundColor))
+                    .autocorrectionDisabled()
+                    .overlay(RoundedRectangle(cornerRadius: Radius.xs).stroke(Color(nsColor: .separatorColor)))
+                    .frame(minHeight: Metrics.bodyEditorMinHeight, maxHeight: .infinity)
+                    .padding(.horizontal, Space.pane)
+                if request.customBodyIsIgnored {
+                    Label("\(request.method) requests cannot carry a body. Parameters are sent in the URL instead.", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(Palette.warning)
+                        .padding(.horizontal, Space.pane)
+                }
+            } else {
+                Text(parametersDestination)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
                     .padding(.horizontal, Space.pane)
             }
-            Spacer(minLength: 8)
         }
+        .padding(.bottom, Space.md)
+        .frame(maxHeight: request.usesCustomBody ? .infinity : nil, alignment: .top)
+    }
+
+    /// Where the parameters go while no custom body is set, as RequestBuilder decides.
+    private var parametersDestination: String {
+        ["GET", "HEAD", "DELETE", "TRACE"].contains(request.method)
+            ? "\(request.method) sends the parameters in the URL."
+            : "The parameters are sent as the body."
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -129,7 +139,7 @@ struct RequestEditor: View {
                 accessory()
             }
             .padding(.horizontal, Space.pane)
-            .padding(.top, Space.sm)
+            .padding(.top, Space.md)
             content()
         }
     }

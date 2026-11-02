@@ -17,7 +17,7 @@ struct RequestWindow: View {
 
     var body: some View {
         HSplitView {
-            RequestEditor(request: $request, showsAuthorization: $session.showsAuthorization)
+            RequestEditor(request: $request)
                 .frame(minWidth: Metrics.editorMinWidth, idealWidth: Metrics.editorIdealWidth, maxHeight: .infinity)
             ResponsePane(exchange: session.exchange, isSending: session.isSending, tab: $session.responseTab)
                 .frame(minWidth: Metrics.responseMinWidth, idealWidth: Metrics.responseIdealWidth, maxHeight: .infinity)

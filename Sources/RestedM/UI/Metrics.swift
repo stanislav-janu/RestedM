@@ -13,4 +13,7 @@ enum Metrics {
     static let rowNameMinWidth: CGFloat = 120
     static let rowNameMaxWidth: CGFloat = 220
     static let sheetWidth: CGFloat = 440
+    static let bodyEditorMinHeight: CGFloat = 120
+    static let settingsWidth: CGFloat = 520
+    static let timeoutLabelWidth: CGFloat = 44
 }

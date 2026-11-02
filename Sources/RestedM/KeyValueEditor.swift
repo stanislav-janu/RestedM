@@ -12,22 +12,20 @@ struct KeyValueEditor: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                LazyVStack(spacing: Space.xs) {
-                    ForEach($rows) { $row in
-                        rowView($row)
-                    }
-                    if rows.isEmpty {
-                        Text("No \(namePlaceholder.components(separatedBy: " ").first?.lowercased() ?? "row")s")
-                            .font(.callout)
-                            .foregroundStyle(.tertiary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, Space.md)
-                    }
+            VStack(spacing: Space.xs) {
+                ForEach($rows) { $row in
+                    rowView($row)
                 }
-                .padding(.horizontal, Space.pane)
-                .padding(.vertical, Space.xs)
+                if rows.isEmpty {
+                    Text("No \(namePlaceholder.components(separatedBy: " ").first?.lowercased() ?? "row")s")
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Space.md)
+                }
             }
+            .padding(.horizontal, Space.pane)
+            .padding(.vertical, Space.xs)
             HStack {
                 Button {
                     rows.append(KeyValueRow())
