@@ -17,7 +17,8 @@ struct RequestEditor: View {
                             namePlaceholder: "Header Field",
                             valuePlaceholder: "Header Value",
                             nameSuggestions: { _ in HeaderCatalog.names },
-                            valueSuggestions: { HeaderCatalog.suggestions(for: $0) }
+                            valueSuggestions: { HeaderCatalog.suggestions(for: $0) },
+                            parsePasted: HeaderText.rows(from:)
                         )
                     }
                     Divider()

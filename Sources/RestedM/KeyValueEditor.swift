@@ -9,6 +9,8 @@ struct KeyValueEditor: View {
     let valuePlaceholder: String
     let nameSuggestions: ((String) -> [String])?
     let valueSuggestions: ((String) -> [String])?
+    /// Turns pasted text into rows; nil hides the Paste button.
+    var parsePasted: ((String) -> [KeyValueRow])? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,6 +34,16 @@ struct KeyValueEditor: View {
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
+                if let parsePasted {
+                    Button {
+                        if let text = NSPasteboard.general.string(forType: .string) {
+                            rows.append(contentsOf: parsePasted(text))
+                        }
+                    } label: {
+                        Label("Paste", systemImage: "document.on.clipboard")
+                    }
+                    .help("Add one row for each “Name: value” line on the clipboard")
+                }
                 Spacer()
             }
             .buttonStyle(.borderless)
@@ -43,6 +55,15 @@ struct KeyValueEditor: View {
 
     private func rowView(_ row: Binding<KeyValueRow>) -> some View {
         HStack(spacing: Space.sm) {
+            Image(systemName: "line.3.horizontal")
+                .foregroundStyle(.tertiary)
+                .frame(width: Space.md)
+                .contentShape(Rectangle())
+                .help("Drag to change the order")
+                .draggable(row.wrappedValue.id.uuidString) {
+                    Text(row.wrappedValue.name.isEmpty ? namePlaceholder : row.wrappedValue.name)
+                }
+                .accessibilityHidden(true)
             Toggle("", isOn: row.enabled)
                 .labelsHidden()
                 .toggleStyle(.checkbox)
@@ -69,9 +90,45 @@ struct KeyValueEditor: View {
                 Image(systemName: "minus.circle")
             }
             .buttonStyle(.borderless)
-            .help("Remove")
+            .help("Remove this row")
         }
         .opacity(row.wrappedValue.enabled ? 1 : 0.55)
+        .dropDestination(for: String.self) { items, _ in
+            guard let id = items.first.flatMap(UUID.init(uuidString:)) else {
+                return false
+            }
+            move(id, to: row.wrappedValue.id)
+            return true
+        }
+        .contextMenu {
+            Button("Duplicate") {
+                duplicate(row.wrappedValue)
+            }
+            Button(row.wrappedValue.enabled ? "Disable" : "Enable") {
+                row.wrappedValue.enabled.toggle()
+            }
+            Divider()
+            Button("Delete", role: .destructive) {
+                rows.removeAll { $0.id == row.wrappedValue.id }
+            }
+        }
+    }
+
+    private func duplicate(_ row: KeyValueRow) {
+        guard let index = rows.firstIndex(where: { $0.id == row.id }) else {
+            return
+        }
+        rows.insert(KeyValueRow(enabled: row.enabled, name: row.name, value: row.value), at: index + 1)
+    }
+
+    /// Moves a row to the place of another one, as a drag in a list does.
+    private func move(_ id: KeyValueRow.ID, to target: KeyValueRow.ID) {
+        guard id != target,
+              let from = rows.firstIndex(where: { $0.id == id }),
+              let to = rows.firstIndex(where: { $0.id == target }) else {
+            return
+        }
+        rows.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
     }
 }
 

@@ -184,3 +184,9 @@ private func body(_ built: BuiltRequest) -> String {
     let line = JSONPrettyPrinter.errorLine(in: "{\n  \"a\": 1,\n  \"b\": \n}")
     #expect(line != nil && line != 1)
 }
+
+@Test func headerTextBecomesRows() {
+    let rows = HeaderText.rows(from: "Accept: application/json\n\nAuthorization: Bearer a:b\r\nnot a header\nGET https://example.com\nX-Empty:")
+    #expect(rows.map(\.name) == ["Accept", "Authorization", "X-Empty"])
+    #expect(rows.map(\.value) == ["application/json", "Bearer a:b", ""])
+}

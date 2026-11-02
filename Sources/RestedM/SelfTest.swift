@@ -110,7 +110,7 @@ enum SelfTest {
     }
 
     private static func checkSymbols() {
-        let symbols = ["paperplane.fill", "stop.fill", "lock.fill", "lock.open", "minus.circle", "plus", "exclamationmark.triangle", "xmark.octagon.fill", "slider.horizontal.3", "document.on.document"]
+        let symbols = ["paperplane.fill", "stop.fill", "lock.fill", "lock.open", "minus.circle", "plus", "exclamationmark.triangle", "xmark.octagon.fill", "slider.horizontal.3", "document.on.document", "document.on.clipboard", "line.3.horizontal"]
         for name in symbols {
             check("symbol \(name) exists", NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil)
         }

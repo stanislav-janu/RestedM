@@ -177,8 +177,9 @@ As the user, I drag header and parameter rows to reorder them and duplicate or d
 Screens: request-filled
 Acceptance:
 - [manual] Dragging a row changes the JSON key order that is sent.
-- [snap] The row context menu shows Duplicate, Enable/Disable and Delete.
-Status: todo
+- [manual] The row context menu shows Duplicate, Enable/Disable and Delete.
+- [snap] Each row has a drag handle on its leading edge.
+Status: done
 
 ### S-015 Paste headers as text
 As the user, I paste lines like `Accept: application/json` into the headers list and they become rows.
@@ -186,8 +187,8 @@ Screens: request-filled
 Depends: S-014
 Acceptance:
 - [unit] "Name: value" lines parse into rows; blank and malformed lines are skipped.
-- [self] Pasting three header lines adds three rows.
-Status: todo
+- [manual] Paste under the headers adds one row per "Name: value" line on the clipboard (a self-test would overwrite the clipboard).
+Status: done
 
 ### S-016 Tell methods apart at a glance
 As the user, I see the method in a color that matches its kind in the URL bar and response summary.
