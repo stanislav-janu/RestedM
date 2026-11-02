@@ -8,7 +8,6 @@ struct RequestWindow: View {
     @State private var session = RequestSession()
     /// A new, empty request focuses its URL; a saved one opens with nothing focused.
     @State private var startsEmpty: Bool
-    @FocusState private var urlFocused: Bool
     @Environment(\.openSettings) private var openSettings
 
     init(request: Binding<RestRequest>) {
@@ -54,7 +53,7 @@ struct RequestWindow: View {
             copyResponseBody: copyResponseBody,
             showResponseTab: { session.responseTab = $0 },
             hasResponse: session.exchange != nil,
-            focusURL: { urlFocused = true },
+            focusURL: { URLFieldFocus.focus(in: { session.window }) },
             exportLast: exportLast,
             canExport: session.exchange != nil,
             isSending: session.isSending
@@ -62,8 +61,9 @@ struct RequestWindow: View {
         .onAppear {
             if Snapshot.isActive || SelfTest.isActive {
                 Snapshot.register(session, openSettings: openSettings)
-            } else if startsEmpty {
-                urlFocused = true
+            }
+            if startsEmpty && !Snapshot.isActive {
+                URLFieldFocus.focus(in: { session.window })
             }
         }
     }
@@ -88,10 +88,9 @@ struct RequestWindow: View {
             .help("Choose the HTTP method")
             .accessibilityLabel("Method, \(request.method)")
 
-            TextField("URL", text: $request.urlString, prompt: Text("Enter a URL"))
+            TextField("URL", text: $request.urlString, prompt: Text(URLFieldFocus.prompt))
                 .textFieldStyle(.roundedBorder)
                 .font(.system(.body, design: .monospaced))
-                .focused($urlFocused)
                 .onSubmit { session.send(request) }
                 .frame(minWidth: Metrics.urlFieldMinWidth, idealWidth: Metrics.urlFieldIdealWidth, maxWidth: .infinity)
         }
@@ -177,5 +176,34 @@ struct WindowReader: NSViewRepresentable {
                 onWindow(window)
             }
         }
+    }
+}
+
+/// Focuses the URL field in the toolbar. SwiftUI focus state does not reach text fields in a
+/// window toolbar, so this finds the AppKit field by its prompt and makes it first responder.
+@MainActor
+enum URLFieldFocus {
+    static let prompt = "Enter a URL"
+
+    /// Retries for a moment: a new window reaches its view and lays out its toolbar after the
+    /// content appears, so the window is read again on every attempt.
+    static func focus(in window: @escaping @MainActor () -> NSWindow?, attempts: Int = 20) {
+        if let window = window(), let field = field(in: window.contentView?.superview) {
+            window.makeFirstResponder(field)
+        } else if attempts > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                focus(in: window, attempts: attempts - 1)
+            }
+        }
+    }
+
+    private static func field(in view: NSView?) -> NSTextField? {
+        guard let view else {
+            return nil
+        }
+        if let field = view as? NSTextField, field.isEditable, field.placeholderString == prompt {
+            return field
+        }
+        return view.subviews.lazy.compactMap { field(in: $0) }.first
     }
 }

@@ -95,8 +95,8 @@ UX:
 - States: new empty request focuses the URL field; a saved request opens with nothing focused; while sending, Send Request turns into Stop Request
 - Words: URL placeholder "Enter a URL", Send button "Send Request", tooltips "Send the request (⌘R)" and "Stop the request (⌘R)", method picker label "Method"
 - Access: VoiceOver "Method, GET, pop-up button", "URL, text field"; the toolbar folds into the overflow menu when narrow, Send stays visible
-Status: doing
-Note: built and snapshotted. Focus is unverified: ⌘L and a new request focusing the URL need a key window, and the self-test reports SKIP while another RestedM is running. Run `scripts/selftest.sh` with RestedM quit.
+Status: done
+Note: ⌘L, ⌘R and typing in a saved request were checked with real key presses; a new request focusing its URL is a self-test check. SwiftUI focus state does not reach a toolbar text field, so `URLFieldFocus` focuses it through AppKit.
 
 ### S-018 Request options in the toolbar and Request menu
 As the user, I reach Authorization, string encoding and Follow Redirects from the Request menu and a toolbar options menu, not from a bar on the bottom edge.

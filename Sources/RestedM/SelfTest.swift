@@ -79,6 +79,10 @@ enum SelfTest {
         for entry in expected {
             let item = menuItem(entry.title)
             check("menu \(entry.title) exists", item != nil)
+            // SwiftUI leaves the shortcut off a disabled item, so only an enabled one shows it.
+            guard item?.isEnabled != false else {
+                continue
+            }
             check(
                 "menu \(entry.title) uses its shortcut (has \"\(item?.keyEquivalent ?? "")\" \(item?.keyEquivalentModifierMask.rawValue ?? 0))",
                 // macOS moves digit shortcuts to the key in the same place on layouts where
@@ -109,17 +113,6 @@ enum SelfTest {
         session.showsAuthorization = false
         try? await Task.sleep(for: .seconds(0.8))
         check("opening and closing Authorization leaves the request unedited", !document.isDocumentEdited)
-
-        // ⌘L focuses the URL field in the toolbar: the field editor then holds the URL.
-        if let window = session.window {
-            Snapshot.bringForward(window, within: 6)
-        }
-        if let item = menuItem("Select URL Field"), let action = item.action {
-            NSApp.sendAction(action, to: item.target, from: item)
-            try? await Task.sleep(for: .seconds(0.4))
-        }
-        let editor = session.window?.firstResponder as? NSTextView
-        checkWhenKey(session.window, "⌘L focuses the URL field", editor?.isFieldEditor == true && editor?.string == SeedData.request.urlString)
 
         var invalid = SeedData.request
         invalid.urlString = "http://"

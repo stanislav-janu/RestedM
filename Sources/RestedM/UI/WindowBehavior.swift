@@ -89,8 +89,14 @@ private struct WindowHook: NSViewRepresentable {
         }
 
         /// AppKit picks a first control right after the window shows. Clear it after that.
+        /// The hosting view takes the focus instead of nothing: with no first responder in the
+        /// window, SwiftUI turns off the scene's menu commands (⌘R, ⌘L) until a click.
         private func clear(_ window: NSWindow) {
-            DispatchQueue.main.async { window.makeFirstResponder(nil) }
+            DispatchQueue.main.async {
+                if !window.makeFirstResponder(window.contentView) {
+                    window.makeFirstResponder(nil)
+                }
+            }
         }
     }
 }
