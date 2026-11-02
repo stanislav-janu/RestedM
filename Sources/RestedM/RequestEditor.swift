@@ -91,14 +91,17 @@ struct RequestEditor: View {
                 .controlSize(.small)
         }) {
             if request.usesCustomBody {
-                TextEditor(text: $request.body)
-                    .font(.system(size: 12, design: .monospaced))
-                    .scrollContentBackground(.hidden)
-                    .background(Color(nsColor: .textBackgroundColor))
-                    .autocorrectionDisabled()
+                BodyEditor(text: $request.body)
+                    .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Radius.xs))
                     .overlay(RoundedRectangle(cornerRadius: Radius.xs).stroke(Color(nsColor: .separatorColor)))
                     .frame(minHeight: Metrics.bodyEditorMinHeight, maxHeight: .infinity)
                     .padding(.horizontal, Space.pane)
+                if let line = jsonErrorLine {
+                    Label(line > 0 ? "Invalid JSON at line \(line)" : "Invalid JSON", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(Palette.warning)
+                        .padding(.horizontal, Space.pane)
+                }
                 if request.customBodyIsIgnored {
                     Label("\(request.method) requests cannot carry a body. Parameters are sent in the URL instead.", systemImage: "exclamationmark.triangle")
                         .font(.caption)
@@ -114,6 +117,18 @@ struct RequestEditor: View {
         }
         .padding(.bottom, Space.md)
         .frame(maxHeight: request.usesCustomBody ? .infinity : nil, alignment: .top)
+    }
+
+    /// The line of the first JSON error, when the body is meant to be JSON: it starts like JSON
+    /// or an enabled Content-Type header says JSON.
+    private var jsonErrorLine: Int? {
+        let declaresJSON = request.headers.contains {
+            $0.enabled && $0.name.caseInsensitiveCompare("Content-Type") == .orderedSame && $0.value.lowercased().contains("json")
+        }
+        guard declaresJSON || JSONPrettyPrinter.looksLikeJSON(request.body) else {
+            return nil
+        }
+        return JSONPrettyPrinter.errorLine(in: request.body)
     }
 
     /// Where the parameters go while no custom body is set, as RequestBuilder decides.

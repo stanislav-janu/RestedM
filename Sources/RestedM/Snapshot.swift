@@ -12,6 +12,7 @@ enum Snapshot {
     enum Page: String, CaseIterable {
         case requestEmpty = "request-empty"
         case requestFilled = "request-filled"
+        case requestBody = "request-body"
         case responseBody = "response-body"
         case responseHeaders = "response-headers"
         case responseSent = "response-sent"
@@ -66,6 +67,12 @@ enum Snapshot {
                 try? await Task.sleep(for: .seconds(1))
                 filled = sessions.last.flatMap { $0 === empty ? nil : $0 }
             }
+            var withBody: RequestSession?
+            if let url = try? SeedData.writeBodyRequestFile() {
+                _ = try? await NSDocumentController.shared.openDocument(withContentsOf: url, display: true)
+                try? await Task.sleep(for: .seconds(1))
+                withBody = sessions.last.flatMap { $0 === filled || $0 === empty ? nil : $0 }
+            }
 
             // The first activation after launch takes longest; do it before the first capture.
             if let window = empty?.window {
@@ -75,7 +82,7 @@ enum Snapshot {
                 NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
                 for page in pages {
                     let path = "\(directory)/\(page.rawValue)-\(mode).png"
-                    await show(page, empty: empty, filled: filled, path: path)
+                    await show(page, empty: empty, filled: page == .requestBody ? withBody : filled, path: path)
                 }
             }
             print("SNAPSHOT done \(directory)")
@@ -90,7 +97,7 @@ enum Snapshot {
             return
         }
         switch page {
-        case .requestEmpty, .requestFilled:
+        case .requestEmpty, .requestFilled, .requestBody:
             session?.exchange = nil
             session?.buildError = nil
         case .responseBody, .responseHeaders, .responseSent:

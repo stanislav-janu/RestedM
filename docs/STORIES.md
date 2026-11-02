@@ -161,7 +161,7 @@ Acceptance:
 - [snap] JSON keys, strings and numbers use the same colors as the response body.
 - [snap] Invalid JSON with a JSON Content-Type shows "Invalid JSON at line N" under the editor.
 - [manual] Smart quotes and autocorrection never change the body.
-Status: todo
+Status: done
 
 ### S-013 Copy parts of the response
 As the user, I copy the body, a header or the status line from the response pane.

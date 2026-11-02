@@ -177,3 +177,10 @@ private func body(_ built: BuiltRequest) -> String {
     request.parameters = [KeyValueRow(name: "id", value: "1"), KeyValueRow(enabled: false, name: "org", value: "x")]
     #expect(RequestBuilder(request: request, options: SendOptions()).unresolvedPlaceholders == ["org"])
 }
+
+@Test func jsonErrorLineNamesTheBrokenLine() {
+    #expect(JSONPrettyPrinter.errorLine(in: "{\n  \"a\": 1\n}") == nil)
+    #expect(JSONPrettyPrinter.errorLine(in: "") == nil)
+    let line = JSONPrettyPrinter.errorLine(in: "{\n  \"a\": 1,\n  \"b\": \n}")
+    #expect(line != nil && line != 1)
+}

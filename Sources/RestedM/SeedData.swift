@@ -21,11 +21,38 @@ enum SeedData {
         return request
     }
 
+    /// A POST with a custom JSON body that has one mistake, for the body editor page.
+    static var bodyRequest: RestRequest {
+        var request = RestRequest()
+        request.method = "POST"
+        request.urlString = "https://api.example.com/users"
+        request.headers = [KeyValueRow(name: "Content-Type", value: "application/json")]
+        request.usesCustomBody = true
+        request.body = """
+        {
+          "name": "Jana Nováková",
+          "email": "jana@example.com",
+          "active": tru,
+          "teams": [7, 12],
+          "manager": null
+        }
+        """
+        return request
+    }
+
     /// Writes the sample request to a temporary `.request` file and returns its URL.
     static func writeRequestFile() throws -> URL {
+        try write(request, named: "Users API.request")
+    }
+
+    static func writeBodyRequestFile() throws -> URL {
+        try write(bodyRequest, named: "Create User.request")
+    }
+
+    private static func write(_ request: RestRequest, named name: String) throws -> URL {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("RestedM-seed", isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        let url = folder.appendingPathComponent("Users API.request")
+        let url = folder.appendingPathComponent(name)
         try RequestFile.encode(request).write(to: url)
         return url
     }

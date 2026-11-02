@@ -2,12 +2,42 @@ import Foundation
 
 /// Re-indents JSON text without parsing it into dictionaries, so key order is kept.
 public enum JSONPrettyPrinter {
+    /// Starts like a JSON object or array, whether or not it parses.
+    public static func looksLikeJSON(_ text: String) -> Bool {
+        guard let first = text.first(where: { !$0.isWhitespace }) else {
+            return false
+        }
+        return first == "{" || first == "["
+    }
+
     public static func isJSON(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let first = trimmed.first, first == "{" || first == "[" else {
             return false
         }
         return (try? JSONSerialization.jsonObject(with: Data(trimmed.utf8), options: [.fragmentsAllowed])) != nil
+    }
+
+    /// Why text that should be JSON is not: nil when it parses, otherwise the 1-based line of
+    /// the first error when the parser names one (0 when it does not).
+    public static func errorLine(in text: String) -> Int? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return nil
+        }
+        do {
+            _ = try JSONSerialization.jsonObject(with: Data(text.utf8), options: [.fragmentsAllowed])
+            return nil
+        } catch {
+            let description = (error as NSError).userInfo[NSDebugDescriptionErrorKey] as? String ?? ""
+            let pattern = try! NSRegularExpression(pattern: #"line (\d+)"#)
+            let range = NSRange(description.startIndex..., in: description)
+            guard let match = pattern.firstMatch(in: description, range: range),
+                  let lineRange = Range(match.range(at: 1), in: description) else {
+                return 0
+            }
+            return Int(description[lineRange]) ?? 0
+        }
     }
 
     public static func format(_ text: String, indent: String = "  ") -> String? {
