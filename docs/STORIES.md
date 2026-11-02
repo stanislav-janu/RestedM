@@ -169,8 +169,8 @@ Screens: response-body, response-headers
 Acceptance:
 - [snap] A Copy button in the response tab bar copies the shown tab as text.
 - [self] Edit ▸ Copy Response Body (Shift-Command-C) puts the raw body on the pasteboard.
-- [self] View ▸ Response Body, Response Headers and Request (Option-Command-1, 2, 3) switch the tabs.
-Status: todo
+- [self] View ▸ Response Body, Response Headers and Sent Request (Option-Command-1, 2, 3) switch the tabs.
+Status: done
 
 ### S-014 Reorder and duplicate rows
 As the user, I drag header and parameter rows to reorder them and duplicate or delete a row from its context menu.
@@ -195,7 +195,7 @@ Screens: request-filled, response-body
 Acceptance:
 - [snap] GET, POST, PUT, PATCH and DELETE each have their own tint; others use the accent color.
 - [snap] Text on the tint uses the on-accent token and passes 4.5:1 in light and dark mode.
-Status: todo
+Status: done
 
 ## M3 Environments
 

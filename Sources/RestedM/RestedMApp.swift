@@ -79,6 +79,9 @@ struct RestedMApp: App {
 struct RequestActions {
     var send: () -> Void
     var showAuthorization: () -> Void
+    var copyResponseBody: () -> Void
+    var showResponseTab: (ResponseTab) -> Void
+    var hasResponse: Bool
     var focusURL: () -> Void
     var exportLast: () -> Void
     var canExport: Bool
@@ -107,6 +110,23 @@ struct RequestCommands: Commands {
             }
             .keyboardShortcut("s", modifiers: [.command, .option])
             .disabled(actions?.canExport != true)
+        }
+        CommandGroup(after: .pasteboard) {
+            Button("Copy Response Body") {
+                actions?.copyResponseBody()
+            }
+            .keyboardShortcut("c", modifiers: [.command, .shift])
+            .disabled(actions?.hasResponse != true)
+        }
+        CommandGroup(before: .toolbar) {
+            ForEach(ResponseTab.allCases) { tab in
+                Button(tab.title) {
+                    actions?.showResponseTab(tab)
+                }
+                .keyboardShortcut(KeyEquivalent(Character("\(tab.rawValue + 1)")), modifiers: [.command, .option])
+                .disabled(actions?.hasResponse != true)
+            }
+            Divider()
         }
         CommandMenu("Request") {
             Button(actions?.isSending == true ? "Stop Request" : "Send Request") {

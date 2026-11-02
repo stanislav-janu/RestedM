@@ -75,7 +75,7 @@ enum ResponseTab: Int, CaseIterable, Identifiable {
         case .headers:
             return "Response Headers"
         case .request:
-            return "Request"
+            return "Sent Request"
         }
     }
 }

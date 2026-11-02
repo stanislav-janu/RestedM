@@ -50,6 +50,9 @@ struct RequestWindow: View {
         .focusedSceneValue(\.requestActions, RequestActions(
             send: { session.toggleSend(request) },
             showAuthorization: { session.showsAuthorization = true },
+            copyResponseBody: copyResponseBody,
+            showResponseTab: { session.responseTab = $0 },
+            hasResponse: session.exchange != nil,
             focusURL: { urlFocused = true },
             exportLast: exportLast,
             canExport: session.exchange != nil,
@@ -67,14 +70,22 @@ struct RequestWindow: View {
     /// Method and URL, one toolbar group that takes the free width.
     private var addressBar: some View {
         HStack(spacing: Space.sm) {
-            Picker("Method", selection: $request.method) {
-                ForEach(methodChoices, id: \.self) { method in
-                    Text(method).tag(method)
+            Menu {
+                Picker("Method", selection: $request.method) {
+                    ForEach(methodChoices, id: \.self) { method in
+                        Text(method).tag(method)
+                    }
                 }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } label: {
+                MethodBadge(method: request.method)
             }
-            .labelsHidden()
+            .menuStyle(.button)
+            .buttonStyle(.plain)
             .fixedSize()
             .help("Choose the HTTP method")
+            .accessibilityLabel("Method, \(request.method)")
 
             TextField("URL", text: $request.urlString, prompt: Text("Enter a URL"))
                 .textFieldStyle(.roundedBorder)
@@ -113,6 +124,18 @@ struct RequestWindow: View {
 
     private var methodChoices: [String] {
         RestRequest.methods.contains(request.method) ? RestRequest.methods : RestRequest.methods + [request.method]
+    }
+
+    private func copyResponseBody() {
+        guard let exchange = session.exchange else {
+            return
+        }
+        NSPasteboard.general.clearContents()
+        if let text = exchange.bodyText {
+            NSPasteboard.general.setString(text, forType: .string)
+        } else {
+            NSPasteboard.general.setData(exchange.body, forType: NSPasteboard.PasteboardType(exchange.contentType.isEmpty ? "public.data" : exchange.contentType))
+        }
     }
 
     private func exportLast() {

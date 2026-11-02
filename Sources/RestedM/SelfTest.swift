@@ -61,13 +61,20 @@ enum SelfTest {
             ("Select URL Field", "l", [.command]),
             ("Save Last Request & Response…", "s", [.command, .option]),
             ("Authorization…", "a", [.command, .option]),
+            ("Copy Response Body", "c", [.command, .shift]),
+            ("Response Body", "1", [.command, .option]),
+            ("Response Headers", "2", [.command, .option]),
+            ("Sent Request", "3", [.command, .option]),
         ]
         for entry in expected {
             let item = menuItem(entry.title)
             check("menu \(entry.title) exists", item != nil)
             check(
-                "menu \(entry.title) uses its shortcut",
-                item?.keyEquivalent == entry.key && item?.keyEquivalentModifierMask == entry.modifiers
+                "menu \(entry.title) uses its shortcut (has \"\(item?.keyEquivalent ?? "")\" \(item?.keyEquivalentModifierMask.rawValue ?? 0))",
+                // macOS moves digit shortcuts to the key in the same place on layouts where
+                // digits need Shift (Czech ⌥⌘1 shows as ⌥⌘+), so only the modifiers must match.
+                (item?.keyEquivalent == entry.key || entry.key.allSatisfy(\.isNumber) && item?.keyEquivalent.isEmpty == false)
+                    && item?.keyEquivalentModifierMask == entry.modifiers
             )
         }
     }
@@ -103,7 +110,7 @@ enum SelfTest {
     }
 
     private static func checkSymbols() {
-        let symbols = ["paperplane.fill", "stop.fill", "lock.fill", "lock.open", "minus.circle", "plus", "exclamationmark.triangle", "xmark.octagon.fill", "slider.horizontal.3"]
+        let symbols = ["paperplane.fill", "stop.fill", "lock.fill", "lock.open", "minus.circle", "plus", "exclamationmark.triangle", "xmark.octagon.fill", "slider.horizontal.3", "document.on.document"]
         for name in symbols {
             check("symbol \(name) exists", NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil)
         }

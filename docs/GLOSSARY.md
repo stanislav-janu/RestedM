@@ -18,6 +18,7 @@ Every word RestedM puts on screen. One name per idea, in buttons, menus, tooltip
 | Text Encoding | The character set used for the URL, parameters and body (UTF-8, ISO Latin-1, ASCII) | encoding, charset |
 | Form-encoded, JSON-encoded | How parameters are written into the body | format, content type |
 | Follow Redirects | Follow 3xx responses to their new location | redirect, auto-redirect |
+| Sent Request | The request exactly as it went out, shown in the response pane | Request tab, raw request |
 | Status | The response's code and reason, such as "404 Not Found" | result, code |
 | Response Time | Time from sending to the last byte of the response | duration, latency |
 | Environment | A named set of variables, such as dev, staging or prod | profile, workspace, context |

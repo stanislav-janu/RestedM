@@ -30,13 +30,24 @@ struct ResponsePane: View {
             } else if let exchange {
                 summary(exchange)
                 Divider()
-                Picker("View", selection: selectedTab) {
-                    ForEach(ResponseTab.allCases) { tab in
-                        Text(tab.title).tag(tab)
+                HStack(spacing: Space.sm) {
+                    Picker("View", selection: selectedTab) {
+                        ForEach(ResponseTab.allCases) { tab in
+                            Text(tab.title).tag(tab)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity)
+                    Button {
+                        copyShownTab(exchange)
+                    } label: {
+                        Label("Copy", systemImage: "document.on.document")
+                    }
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.borderless)
+                    .help("Copy the shown tab as text")
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
                 .padding(.horizontal, Space.pane)
                 .padding(.vertical, Space.sm)
                 if exchange.response == nil && selectedTab.wrappedValue == .body {
@@ -76,12 +87,7 @@ struct ResponsePane: View {
     private func summary(_ exchange: HTTPExchange) -> some View {
         VStack(alignment: .leading, spacing: Space.sm) {
             HStack(spacing: Space.sm) {
-                Text(exchange.method)
-                    .font(.caption.bold())
-                    .foregroundStyle(Palette.onAccent)
-                    .padding(.horizontal, Space.sm)
-                    .padding(.vertical, Space.hairline)
-                    .background(Palette.accent, in: RoundedRectangle(cornerRadius: Radius.xs))
+                MethodBadge(method: exchange.method)
                 Text(exchange.url.absoluteString)
                     .font(.system(.callout, design: .monospaced))
                     .lineLimit(1)
@@ -110,6 +116,12 @@ struct ResponsePane: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Space.pane)
+    }
+
+    private func copyShownTab(_ exchange: HTTPExchange) {
+        let text = ResponseRenderer.render(exchange, tab: selectedTab.wrappedValue, pretty: prettyPrint, highlight: false).string
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
     }
 
     private func formatted(_ interval: TimeInterval) -> String {

@@ -46,6 +46,33 @@ enum StatusColors {
     }
 }
 
+/// Method tints: text in the color on a light wash of it. Each passes 4.5:1 on its wash in both modes.
+enum MethodColors {
+    static let get = NSColor(light: 0x0A5FC2, dark: 0x64A8FF, highContrastLight: 0x0848A0, highContrastDark: 0x99C7FF)
+    static let post = NSColor(light: 0x17703A, dark: 0x4AD66D, highContrastLight: 0x12602A, highContrastDark: 0x7EE896)
+    static let put = NSColor(light: 0x9A4A00, dark: 0xFFB340, highContrastLight: 0x7F3A00, highContrastDark: 0xFFCC80)
+    static let patch = NSColor(light: 0x7A3BC4, dark: 0xC69CFF, highContrastLight: 0x5F2A9E, highContrastDark: 0xDCC2FF)
+    static let delete = NSColor(light: 0xB3221A, dark: 0xFF8A84, highContrastLight: 0x9C1C15, highContrastDark: 0xFFB0AC)
+
+    /// The tint of a method, or the accent text color for the others (HEAD, OPTIONS, TRACE, custom).
+    static func color(for method: String) -> Color {
+        switch method.uppercased() {
+        case "GET":
+            return Color(nsColor: get)
+        case "POST":
+            return Color(nsColor: post)
+        case "PUT":
+            return Color(nsColor: put)
+        case "PATCH":
+            return Color(nsColor: patch)
+        case "DELETE":
+            return Color(nsColor: delete)
+        default:
+            return Palette.accentText
+        }
+    }
+}
+
 /// Syntax colors for code shown on the text background. Each passes 4.5:1 in both modes.
 enum CodeColors {
     static let key = NSColor(light: 0x9B2393, dark: 0xFC5FA3, highContrastLight: 0x7A1B74, highContrastDark: 0xFF8CC0)
